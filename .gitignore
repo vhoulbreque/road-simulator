@@ -1,0 +1,8 @@
+.ipynb_checkpoints
+.ipynb
+dataset/
+gpics
+ground_pics/
+__pycache__
+.pyc
+notebooks/
