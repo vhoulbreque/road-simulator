@@ -1,23 +1,9 @@
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
-import PIL
 import os
-
-from colors import *
-from layers import *
-from simulator import *
-
-from PIL import Image, ImageDraw
-from math import sqrt, atan2, pi
-from random import randint
 import numpy as np
-import random
 
-
-from random import randint
-from tqdm import tqdm
-import os
-from random import choice
-
+from colors import color_range_init, white_range_init, yellow_range_init, shadow_colors_init
+from layers import Background, Crop, Perspective, DrawLines, Shadows, Filter, NoiseLines, Enhance, Symmetric
+from simulator import Simulator
 
 
 if __name__ == '__main__':

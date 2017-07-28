@@ -1,22 +1,5 @@
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
-import PIL
-import os
+from math import sqrt
 
-from colors import *
-from layers import *
-
-
-from PIL import Image, ImageDraw
-from math import sqrt, atan2, pi
-from random import randint
-import numpy as np
-import random
-
-
-from random import randint
-from tqdm import tqdm
-import os
-from random import choice
 
 class RoadLine:
     def __init__(self, x0, y0, x1, y1, radius, thickness=10, color=(255, 255, 255)):

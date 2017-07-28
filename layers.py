@@ -1,22 +1,13 @@
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
 import PIL
 import os
-
-from colors import *
-from basic_objects import *
-
-from PIL import Image, ImageDraw
-from math import sqrt, atan2, pi
-from random import randint
 import numpy as np
-from random import shuffle
 
-
-from random import randint
+from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
+from math import sqrt, atan2, pi
+from random import randint, shuffle, choice, gauss, random
 from tqdm import tqdm
-import os
-from random import choice
 
+from basic_objects import Point, RoadLine, Circle
 
 
 WIDTHS = [i for i in range(250, 750)]
@@ -48,14 +39,14 @@ class DrawLines(Layer):
 
     def middle_lines_generator(xy0_range, xy1_range, radius_range, thickness_range, color_range):
 
-        index = int(random.gauss(len(xy0_range)//2, 50))
+        index = int(gauss(len(xy0_range)//2, 50))
         while index >= len(xy0_range) or index < 0:
-            index = int(random.gauss(len(xy0_range)//2, 50))
+            index = int(gauss(len(xy0_range)//2, 50))
         x0, y0 = xy0_range[index]
 
-        index = int(random.gauss(len(xy1_range)//2, 100))
+        index = int(gauss(len(xy1_range)//2, 100))
         while index >= len(xy1_range) or index < 0:
-            index = int(random.gauss(len(xy1_range)//2, 100))
+            index = int(gauss(len(xy1_range)//2, 100))
         x1, y1 = xy1_range[index]
 
         radius = radius_range[randint(0, len(radius_range)-1)]
@@ -100,7 +91,7 @@ class DrawLines(Layer):
             pt0 = Point(curr_line.x0, curr_line.y0)
             pt1 = Point(curr_line.x1, curr_line.y1)
             center = pts2center(pt0, pt1, radius)
-            vect = 0.5 * (pt0+pt1) - center
+            vect = 0.5 * (pt0 + pt1) - center
             target_pt = center + vect * (radius/vect.norm())
 
             target_vect = target_pt - pose
@@ -111,14 +102,14 @@ class DrawLines(Layer):
 
         def middle_lines_generator(xy0_range, xy1_range, radius_range, thickness_range, color_range):
 
-            index = int(random.gauss(len(xy0_range)//2, 50))
+            index = int(gauss(len(xy0_range)//2, 50))
             while index >= len(xy0_range) or index < 0:
-                index = int(random.gauss(len(xy0_range)//2, 50))
+                index = int(gauss(len(xy0_range)//2, 50))
             x0, y0 = xy0_range[index]
 
-            index = int(random.gauss(len(xy1_range)//2, 100))
+            index = int(gauss(len(xy1_range)//2, 100))
             while index >= len(xy1_range) or index < 0:
-                index = int(random.gauss(len(xy1_range)//2, 100))
+                index = int(gauss(len(xy1_range)//2, 100))
             x1, y1 = xy1_range[index]
 
             radius = radius_range[randint(0, len(radius_range)-1)]
@@ -131,17 +122,17 @@ class DrawLines(Layer):
             # Real lines
             line1 = line.copy()
             line2 = line.copy()
-            line1.color = random.choice(color_range)
-            line2.color = random.choice(color_range)
+            line1.color = choice(color_range)
+            line2.color = choice(color_range)
             img = draw_lines(img, line1 - int(width/2), line2 + int(width/2), right_turn=right_turn)
 
             # Noise lines
             if randint(0, 1):
                 line1 = line.copy()
                 line2 = line.copy()
-                line1.color = random.choice(color_range)
-                line2.color = random.choice(color_range)
-                width_noise = (1.4 + 3 * random.random()) * width
+                line1.color = choice(color_range)
+                line2.color = choice(color_range)
+                width_noise = (1.4 + 3 * random()) * width
                 img = draw_lines(img, line1 - int(width_noise/2), line2 + int(width_noise/2), right_turn=right_turn)
             return img
 
@@ -274,7 +265,7 @@ class Shadows(Noise):
                 y2 = randint(y1, img.height)
             else:
                 y2 = randint(0, y1)
-        color = random.choice(self.colors)
+        color = choice(self.colors)
         draw = ImageDraw.Draw(img)
         draw.rectangle((x1, y1, x2, y2), fill=color, outline=color)
         del draw
@@ -315,6 +306,7 @@ class Filter(Noise):
         else:
             pass
         return im_n
+
 
 class NoiseLines(Noise):
 
@@ -456,7 +448,7 @@ class Symmetric(Layer):
         sym = img.copy()
 
         symmetry = False
-        if random.random() < self.proba:
+        if random() < self.proba:
             from_points = [(0, 0), (width-1, 0), (width-1, height-1), (0, height-1)]
             new_points = [(width-1, 0), (0, 0), (0, height-1), (width-1, height-1)]
             coeffs = find_coeffs(new_points, from_points)

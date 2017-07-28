@@ -1,24 +1,3 @@
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
-import PIL
-import os
-
-from colors import *
-from layers import *
-
-
-from PIL import Image, ImageDraw
-from math import sqrt, atan2, pi
-from random import randint
-import numpy as np
-import random
-
-
-from random import randint
-from tqdm import tqdm
-import os
-from random import choice
-
-
 def color_range_init():
     color_range = []
 
