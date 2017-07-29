@@ -1,9 +1,10 @@
 .ipynb_checkpoints
 .ipynb
+
 dataset/
-ground_pics/
+notebooks/
+
 __pycache__
 .pyc
-notebooks/
 
 example/examples_pictures/
