@@ -2,7 +2,8 @@ import os
 import numpy as np
 
 from colors import color_range_init, white_range_init, yellow_range_init, shadow_colors_init
-from layers import Background, Crop, Perspective, DrawLines, Shadows, Filter, NoiseLines, Enhance, Symmetric
+from layers.layers import Background, Crop, Perspective, DrawLines, Symmetric
+from layers.noise import Shadows, Filter, NoiseLines, Enhance
 from simulator import Simulator
 
 
@@ -39,5 +40,3 @@ if __name__ == '__main__':
     layers = [background_layer, lines_layer, symmetry_layer, shadow_layer, noisylines_layer, filter_layer, enhance_layer, perspective_layer, crop_layer]
     simulator = Simulator(layers)
     simulator.generate(n_examples=100, path='dataset')
-
-    n_max = 1 * 1 * 1000

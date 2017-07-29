@@ -3,7 +3,7 @@ import os
 from random import randint
 from tqdm import tqdm
 
-from layers import Background, DrawLines, Symmetric
+from layers.layers import Background, DrawLines, Symmetric
 
 
 class Simulator():
@@ -49,3 +49,11 @@ class Simulator():
             angle = -angle
         name = '_gas_' + str(gas) + '_dir_' +  str(angle) + '.jpg'
         return im, name
+
+
+    def summary(self):
+
+        summaries = [layer.summary() for layer in self.layers]
+
+        s = 'Summary:\nNumber of layers: {}\n{}'.format(len(self.layers), '\n'.join(summaries))
+        return s
