@@ -10,11 +10,6 @@ from tqdm import tqdm
 from basic_objects import Point, RoadLine, Circle
 
 
-WIDTHS = [i for i in range(250, 750)]
-ANGLE_ROT_MAX = 20
-ANGLES = [i for i in range(0, ANGLE_ROT_MAX)] + [i for i in range(360-ANGLE_ROT_MAX, 360)] + [i for i in range(180-ANGLE_ROT_MAX, 180+ANGLE_ROT_MAX)]
-
-
 class Layer():
 
     def __init__(self):
@@ -36,53 +31,6 @@ class DrawLines(Layer):
         self.white_range = white_range
         self.yellow_range = yellow_range
         super(DrawLines, self).__init__()
-
-    def middle_lines_generator(xy0_range, xy1_range, radius_range, thickness_range, color_range):
-
-        index = int(gauss(len(xy0_range)//2, 50))
-        while index >= len(xy0_range) or index < 0:
-            index = int(gauss(len(xy0_range)//2, 50))
-        x0, y0 = xy0_range[index]
-
-        index = int(gauss(len(xy1_range)//2, 100))
-        while index >= len(xy1_range) or index < 0:
-            index = int(gauss(len(xy1_range)//2, 100))
-        x1, y1 = xy1_range[index]
-
-        radius = radius_range[randint(0, len(radius_range)-1)]
-        thickness = thickness_range[randint(0, len(thickness_range)-1)]
-        color = color_range[randint(0, len(color_range)-1)]
-
-        return RoadLine(x0, y0, x1, y1, radius, thickness=thickness, color=color)
-
-
-    def draw_line(draw, line, right_turn=True, plain=1, empty=0):
-
-        if line.y1 > line.y0:
-            x0, y0 = line.x1, line.y1
-            x1, y1 = line.x0, line.y0
-        else:
-            x0, y0 = line.x0, line.y0
-            x1, y1 = line.x1, line.y1
-
-        if x0 == x1:
-            draw.line([x0, y0, x1, y1], fill=line.color, width=line.thickness)
-        else:
-            radius = line.radius
-            pt0 = point(x0, y0)
-            pt1 = point(x1, y1)
-            center = pts2center(pt0, pt1, radius, right_turn=right_turn)
-            thickness = line.thickness
-            color = line.color
-
-            circle1 = circle(center, radius, thickness=thickness, color=color)
-
-            if empty != 0:
-                circle1.plain = plain
-                circle1.empty = empty
-
-            draw_circle(draw, circle1)
-
 
     def call(self, im):
 
@@ -289,7 +237,6 @@ class Filter(Noise):
 
     def call(self, img):
 
-        # TODO: no hardcoded value
         im_n = img.copy()
 
         n = randint(0, 5)
@@ -370,15 +317,26 @@ class Enhance(Noise):
 
 class Background(Layer):
 
-    def __init__(self, n_backgrounds, path, n_rot=1, n_res=1, n_crop=1, input_size=(250, 200)):
+    def __init__(self, n_backgrounds, path, n_rot=1, n_res=1, n_crop=1, input_size=(250, 200), width_range=None, angle_max=20):
+
+        if n_backgrounds <= 0:
+            raise Exception
+        if not os.path.exists(path):
+            raise Exception
+        if not os.path.isdir(path):
+            raise Exception
+        if len(os.listdir(path)) == 0:
+            raise Exception
+
         self.n_backgrounds = n_backgrounds
         self.path = path
         self.n_rot = n_rot
         self.n_res = n_res
         self.n_crop = n_crop
-        self.backgrounds = None
         self.input_size = input_size
-        self.generate_all_backgrounds()
+        self.width_range = width_range
+        self.angles_range = [i for i in range(0, angle_max)] + [i for i in range(360-angle_max, 360)] + [i for i in range(180-angle_max, 180+angle_max)]
+        self.backgrounds = self.generate_all_backgrounds()
         super(Background, self).__init__()
 
     def generate_all_backgrounds(self):
@@ -387,7 +345,8 @@ class Background(Layer):
         # Choice of the background image
         backgrounds = []
         image_names = os.listdir(self.path)
-        for index in tqdm(range(len(image_names)), desc='loading images'):
+        n = min([len(image_names), self.n_backgrounds])
+        for index in tqdm(range(n), desc='loading images'):
             background = Image.open(os.path.join(self.path, image_names[index])).convert('RGB')
             backgrounds.append(background)
 
@@ -397,26 +356,30 @@ class Background(Layer):
             for j in range(self.n_rot):
                 b = background.copy()
                 # Choice of a rotation angle
-                angle_rotation = ANGLES[randint(0, len(ANGLES)-1)]
+                angle_rotation = self.angles_range[randint(0, len(self.angles_range)-1)]
                 b = b.rotate(angle_rotation)
                 new_backgrounds.append(b)
 
         backgrounds = new_backgrounds
-        print(len(backgrounds))
+        if len(backgrounds) >= self.n_backgrounds:
+            shuffle(backgrounds)
+            backgrounds = backgrounds[:self.n_backgrounds]
 
         new_backgrounds = []
         for i in tqdm(range(len(backgrounds)), desc='resizing images'):
             for j in range(self.n_res):
                 b = backgrounds[i]
                 # Choice of the resize size
-                index = randint(0, len(WIDTHS)-1)
-                new_width = WIDTHS[index]
+                index = randint(0, len(self.width_range)-1)
+                new_width = self.width_range[index]
                 new_height = int(4 * new_width / 5)
                 b = b.resize((new_width, new_height), PIL.Image.ANTIALIAS)
                 new_backgrounds.append(b)
 
         backgrounds = new_backgrounds
-        print(len(backgrounds))
+        if len(backgrounds) >= self.n_backgrounds:
+            shuffle(backgrounds)
+            backgrounds = backgrounds[:self.n_backgrounds]
 
         new_backgrounds = []
         for i in tqdm(range(len(backgrounds)), desc='loading images'):
@@ -430,10 +393,9 @@ class Background(Layer):
                 new_backgrounds.append(b)
 
         backgrounds = new_backgrounds
-
         shuffle(backgrounds)
         backgrounds = backgrounds[:self.n_backgrounds]
-        self.backgrounds = backgrounds
+        return backgrounds
 
 
 class Symmetric(Layer):
