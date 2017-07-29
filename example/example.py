@@ -11,7 +11,7 @@ import numpy as np
 
 sys.path.insert(0, '../src/')
 
-from colors import color_range_init, white_range_init, yellow_range_init, shadow_colors_init
+from colors import Yellow, White, DarkShadow
 from layers.layers import Background, Crop, Perspective, DrawLines, Symmetric
 from layers.noise import Shadows, Filter, NoiseLines, Enhance
 from simulator import Simulator
@@ -29,16 +29,16 @@ if __name__ == '__main__':
     width_range = [i for i in range(250, 750)]
     angle_max = 20
 
-    color_range = color_range_init()
+    white_range = White()
+    yellow_range = Yellow()
+    shadow_colors = DarkShadow()
 
-    white_range = white_range_init()
-    yellow_range = yellow_range_init()
-    shadow_colors = shadow_colors_init()
+    color_range = white_range + yellow_range
 
     background_layer = Background(n_backgrounds=3, path='../ground_pics', n_rot=1, n_res=1, n_crop=1, input_size=(250, 200), width_range=width_range, angle_max=angle_max)
     lines_layer = DrawLines(xy0_range, xy1_range, radius_range, thickness_range, color_range, white_range, yellow_range)
     symmetry_layer = Symmetric(proba=0.5)
-    shadow_layer = Shadows(colors=shadow_colors)
+    shadow_layer = Shadows(color=shadow_colors)
     noisylines_layer = NoiseLines(color_range)
     filter_layer = Filter()
     enhance_layer = Enhance()
@@ -49,5 +49,5 @@ if __name__ == '__main__':
     simulator = Simulator(layers)
 
     print(simulator.summary())
-    
+
     simulator.generate(n_examples=100, path='examples_pictures')

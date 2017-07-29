@@ -69,7 +69,7 @@ class DrawLines(Layer):
 
             radius = radius_range[randint(0, len(radius_range)-1)]
             thickness = thickness_range[randint(0, len(thickness_range)-1)]
-            color = color_range[randint(0, len(color_range)-1)]
+            color = color_range.colors[randint(0, len(color_range.colors)-1)]
 
             return RoadLine(x0, y0, x1, y1, radius, thickness=thickness, color=color)
 
@@ -77,16 +77,16 @@ class DrawLines(Layer):
             # Real lines
             line1 = line.copy()
             line2 = line.copy()
-            line1.color = choice(color_range)
-            line2.color = choice(color_range)
+            line1.color = choice(color_range.colors)
+            line2.color = choice(color_range.colors)
             img = draw_lines(img, line1 - int(width/2), line2 + int(width/2), right_turn=right_turn)
 
             # Noise lines
             if randint(0, 1):
                 line1 = line.copy()
                 line2 = line.copy()
-                line1.color = choice(color_range)
-                line2.color = choice(color_range)
+                line1.color = choice(color_range.colors)
+                line2.color = choice(color_range.colors)
                 width_noise = (1.4 + 3 * random()) * width
                 img = draw_lines(img, line1 - int(width_noise/2), line2 + int(width_noise/2), right_turn=right_turn)
             return img

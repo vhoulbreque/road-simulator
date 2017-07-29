@@ -29,13 +29,13 @@ class Noise(Layer):
 
 class Shadows(Noise):
 
-    def __init__(self, colors):
+    def __init__(self, color):
 
         super(Shadows, self).__init__()
 
-        if colors is None:
+        if color is None:
             raise Exception
-        self.colors = colors
+        self.color = color
         self.name = 'Shadows'
 
 
@@ -49,9 +49,9 @@ class Shadows(Noise):
                 y2 = randint(y1, img.height)
             else:
                 y2 = randint(0, y1)
-        color = choice(self.colors)
+        c = choice(self.color.colors)
         draw = ImageDraw.Draw(img)
-        draw.rectangle((x1, y1, x2, y2), fill=color, outline=color)
+        draw.rectangle((x1, y1, x2, y2), fill=c, outline=c)
         del draw
         return img
 
@@ -120,7 +120,7 @@ class NoiseLines(Noise):
             y1 = randint(0, img.height)
             y2 = randint(0, img.height)
             width = randint(1, 10)
-            fill = choice(self.color_range)
+            fill = choice(self.color_range.colors)
             img = draw_line_dep(img, x1, y1, x2, y2, fill, width=width)
 
         return img
