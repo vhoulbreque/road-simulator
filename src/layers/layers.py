@@ -13,16 +13,21 @@ from basic_objects import Point, RoadLine, Circle
 class Layer():
 
     def __init__(self):
-        pass
+        self.name = 'Layer'
 
+    def call(self, img):
+        return img
 
-    def call(self):
-        pass
+    def summary(self):
+        return self.name
 
 
 class DrawLines(Layer):
 
     def __init__(self, xy0_range, xy1_range, radius_range, thickness_range, color_range, white_range, yellow_range):
+
+        super(DrawLines, self).__init__()
+
         self.xy0_range = xy0_range
         self.xy1_range = xy1_range
         self.radius_range = radius_range
@@ -30,7 +35,9 @@ class DrawLines(Layer):
         self.color_range = color_range
         self.white_range = white_range
         self.yellow_range = yellow_range
-        super(DrawLines, self).__init__()
+
+        self.name = 'DrawLines'
+
 
     def call(self, im):
 
@@ -184,135 +191,68 @@ class DrawLines(Layer):
 
         return img, angle, gas
 
+    def summary(self):
+        return '{}'.format(self.name)
 
-class Noise():
+
+class Symmetric(Layer):
+
+    def __init__(self, proba=0.5):
+
+        super(Symmetric, self).__init__()
+
+        self.proba = proba
+        self.name = 'Symmetric'
+
+    def call(self, img):
+
+        width, height = img.size
+        sym = img.copy()
+
+        symmetry = False
+        if random() < self.proba:
+            from_points = [(0, 0), (width-1, 0), (width-1, height-1), (0, height-1)]
+            new_points = [(width-1, 0), (0, 0), (0, height-1), (width-1, height-1)]
+            coeffs = find_coeffs(new_points, from_points)
+            sym = sym.transform((width, height), Image.PERSPECTIVE, coeffs, Image.BICUBIC)
+            symmetry = True
+        return sym, symmetry
+
+    def summary(self):
+        return '{}\t{}'.format(self.name, self.proba)
+
+
+class Perspective(Layer):
 
     def __init__(self):
-        pass
 
+        super(Perspective, self).__init__()
 
-    def call(self, img):
-        pass
-
-
-class Shadows(Noise):
-
-    def __init__(self, colors):
-        if colors is None:
-            raise Exception
-        self.colors = colors
-        super(Shadows, self).__init__()
+        self.name = 'Perspective'
 
     def call(self, img):
-        x1 = randint(0, img.width)
-        x2 = randint(0, img.width)
-        y1 = randint(0, img.height)
-        y2 = 10000000
-        while abs(y2 - y1) > 75:  # TODO: stop hardcoded values
-            if randint(0, 1):
-                y2 = randint(y1, img.height)
-            else:
-                y2 = randint(0, y1)
-        color = choice(self.colors)
-        draw = ImageDraw.Draw(img)
-        draw.rectangle((x1, y1, x2, y2), fill=color, outline=color)
-        del draw
+
+        width, height = img.size
+        from_points = [(0, 0), (249, 0), (249, 199), (0, 199)]
+        new_points = [(253-1, 0), (253+250-1, 0), (253*2+250-1, 70-1), (0, 70-1)]
+        coeffs = find_coeffs(new_points, from_points)
+        img = img.transform((250+253*2, 70), Image.PERSPECTIVE, coeffs, Image.BICUBIC)
         return img
 
 
-class Filter(Noise):
+class Crop(Layer):
 
-    def __init__(self, blur=0, gauss_blur=0, smooth=0, smooth_more=0, rank_filter=0):
-        if blur + gauss_blur + smooth + smooth_more + rank_filter > 1:
-            raise Exception
-        if not all(item >= 0 for item in [blur, gauss_blur, smooth, smooth_more, rank_filter]):
-            raise Exception
+    def __init__(self):
+        super(Crop, self).__init__()
 
-        self.blur = blur
-        self.gauss_blur = gauss_blur
-        self.smooth = smooth
-        self.smooth_more = smooth_more
-        self.rank_filter = rank_filter
-        super(Filter, self).__init__()
+        self.name = 'Crop'
 
     def call(self, img):
-
-        im_n = img.copy()
-
-        n = randint(0, 5)
-        if n == 0:
-            im_n = im_n.filter(ImageFilter.GaussianBlur(1))
-        elif n == 1:
-            im_n = im_n.filter(ImageFilter.BLUR)
-        elif n == 2:
-            im_n = im_n.filter(ImageFilter.SMOOTH)
-        elif n == 3:
-            im_n = im_n.filter(ImageFilter.SMOOTH_MORE)
-        elif n == 4:
-            im_n = im_n.filter(ImageFilter.RankFilter(size=3, rank=7))
-        else:
-            pass
-        return im_n
-
-
-class NoiseLines(Noise):
-
-    def __init__(self, color_range):
-        self.color_range = color_range
-        super(NoiseLines, self).__init__()
-
-    def call(self, img):
-
-        def draw_line_dep(im, x1, y1, x2, y2, fill, width=1):
-            draw = ImageDraw.Draw(im)
-            draw.line((x1, y1, x2, y2), fill=fill, width=width)
-            del draw
-            return im
-
-        n = randint(0, 1)
-        for i in range(n):
-            if randint(0, 3) != 0: continue
-            x1 = randint(0, img.width)
-            x2 = randint(0, img.width)
-            y1 = randint(0, img.height)
-            y2 = randint(0, img.height)
-            width = randint(1, 10)
-            fill = choice(self.color_range)
-            img = draw_line_dep(img, x1, y1, x2, y2, fill, width=width)
-
+        width = img.width
+        height = img.height
+        x_shift = 253
+        img = img.crop((x_shift-1, 0, width-x_shift-1, height))
         return img
-
-
-class Enhance(Noise):
-
-    def __init__(self, contrast=0, brightness=0, sharpness=0, color=0):
-        super(Enhance, self).__init__()
-
-    def call(self, img):
-        n = randint(0, 4)
-
-        im_n = img.copy()
-
-        if n == 0:
-            factor_contrast = randint(5, 10)/10
-            enhancer = ImageEnhance.Contrast(im_n)
-            im_n = enhancer.enhance(factor_contrast)
-        elif n == 1:
-            factor_brightness = randint(5, 15)/10
-            enhancer = ImageEnhance.Brightness(im_n)
-            im_n = enhancer.enhance(factor_brightness)
-        elif n == 2:
-            factor_sharpen = randint(0, 20)/10
-            enhancer = ImageEnhance.Sharpness(im_n)
-            im_n = enhancer.enhance(factor_sharpen)
-        elif n == 3:
-            factor_color = randint(0, 20)/10
-            enhancer = ImageEnhance.Color(im_n)
-            im_n = enhancer.enhance(factor_color)
-        else:
-            pass
-
-        return im_n
 
 
 class Background(Layer):
@@ -328,6 +268,8 @@ class Background(Layer):
         if len(os.listdir(path)) == 0:
             raise Exception
 
+        super(Background, self).__init__()
+
         self.n_backgrounds = n_backgrounds
         self.path = path
         self.n_rot = n_rot
@@ -337,7 +279,8 @@ class Background(Layer):
         self.width_range = width_range
         self.angles_range = [i for i in range(0, angle_max)] + [i for i in range(360-angle_max, 360)] + [i for i in range(180-angle_max, 180+angle_max)]
         self.backgrounds = self.generate_all_backgrounds()
-        super(Background, self).__init__()
+
+        self.name = 'Background'
 
     def generate_all_backgrounds(self):
         width, height = self.input_size
@@ -397,54 +340,8 @@ class Background(Layer):
         backgrounds = backgrounds[:self.n_backgrounds]
         return backgrounds
 
-
-class Symmetric(Layer):
-
-    def __init__(self, proba=0.5):
-        self.proba = proba
-        super(Symmetric, self).__init__()
-
-    def call(self, img):
-
-        width, height = img.size
-        sym = img.copy()
-
-        symmetry = False
-        if random() < self.proba:
-            from_points = [(0, 0), (width-1, 0), (width-1, height-1), (0, height-1)]
-            new_points = [(width-1, 0), (0, 0), (0, height-1), (width-1, height-1)]
-            coeffs = find_coeffs(new_points, from_points)
-            sym = sym.transform((width, height), Image.PERSPECTIVE, coeffs, Image.BICUBIC)
-            symmetry = True
-        return sym, symmetry
-
-
-class Perspective(Layer):
-
-    def __init__(self):
-        super(Perspective, self).__init__()
-
-    def call(self, img):
-
-        width, height = img.size
-        from_points = [(0, 0), (249, 0), (249, 199), (0, 199)]
-        new_points = [(253-1, 0), (253+250-1, 0), (253*2+250-1, 70-1), (0, 70-1)]
-        coeffs = find_coeffs(new_points, from_points)
-        img = img.transform((250+253*2, 70), Image.PERSPECTIVE, coeffs, Image.BICUBIC)
-        return img
-
-
-class Crop(Layer):
-
-    def __init__(self):
-        super(Crop, self).__init__()
-
-    def call(self, img):
-        width = img.width
-        height = img.height
-        x_shift = 253
-        img = img.crop((x_shift-1, 0, width-x_shift-1, height))
-        return img
+    def summary(self):
+        return '{}\t{}\t{}\t{}\t{}'.format(self.name, self.n_backgrounds, self.n_res, self.n_rot, self.n_crop)
 
 
 def find_coeffs(pa, pb):
