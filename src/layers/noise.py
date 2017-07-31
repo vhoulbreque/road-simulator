@@ -25,11 +25,14 @@ class Noise(Layer):
         By default, identity layer.
     '''
 
-    def __init__(self):
-        self.name = 'Noise'
+    def __init__(self, name='Noise'):
+        if name is None:
+            raise ValueError('')
+        self.name = name
 
     def call(self, img):
-        if img is None: raise ValueError('img is None')
+        if img is None:
+            raise ValueError('img is None')
         return img
 
     def summary(self):
@@ -42,18 +45,22 @@ class Shadows(Noise):
         Adds shadows to the image.
     '''
 
-    def __init__(self, color):
+    def __init__(self, color=(255, 255, 255), name='Shadows'):
+
+        if name is None:
+            raise ValueError('')
+        if color is None:
+            raise ValueError('')
 
         super(Shadows, self).__init__()
 
-        if color is None:
-            raise Exception
         self.color = color
-        self.name = 'Shadows'
+        self.name = name
 
     def call(self, img):
 
-        if img is None: raise ValueError('img is None')
+        if img is None:
+            raise ValueError('img is None')
 
         x1 = randint(0, img.width)
         x2 = randint(0, img.width)
@@ -80,11 +87,15 @@ class Filter(Noise):
         Adds filters to the image.
     '''
 
-    def __init__(self, blur=0, gauss_blur=0, smooth=0, smooth_more=0, rank_filter=0):
+    def __init__(self, blur=0, gauss_blur=0, smooth=0, smooth_more=0, rank_filter=0, name='Filter'):
+        if name is None:
+            raise ValueError
+        if not all([item is not None for item in [blur, gauss_blur, smooth, smooth_more, rank_filter]]):
+            raise ValueError
         if blur + gauss_blur + smooth + smooth_more + rank_filter > 1:
-            raise Exception
-        if not all(item >= 0 for item in [blur, gauss_blur, smooth, smooth_more, rank_filter]):
-            raise Exception
+            raise ValueError
+        if not all(0 <= item <= 1 for item in [blur, gauss_blur, smooth, smooth_more, rank_filter]):
+            raise ValueError
 
         super(Filter, self).__init__()
 
@@ -94,7 +105,7 @@ class Filter(Noise):
         self.smooth_more = smooth_more
         self.rank_filter = rank_filter
 
-        self.name = 'Filter'
+        self.name = name
 
     def call(self, img):
 
@@ -130,7 +141,18 @@ class NoiseLines(Noise):
         Adds noise lines to the image i.e. lines randomly on the picture.
     '''
 
-    def __init__(self, color_range, n_lines_max=1, proba_line=0.33):
+    def __init__(self, color_range, n_lines_max=1, proba_line=0.33, name='NoiseLines'):
+
+        if name is None:
+            raise ValueError('')
+        if color_range is None:
+            raise ValueError
+        if len(color_range.colors) == 0:
+            raise ValueError
+        if (not isinstance(n_lines_max, int)) or n_lines_max < 0:
+            raise ValueError
+        if not (isinstance(proba_line, float) or isinstance(proba_line, int)) or not 0 <= proba_line <= 1:
+            raise ValueError
 
         super(NoiseLines, self).__init__()
 
@@ -138,7 +160,7 @@ class NoiseLines(Noise):
         self.n_lines_max = n_lines_max
         self.proba_line = proba_line
 
-        self.name = 'NoiseLines'
+        self.name = name
 
 
     def call(self, img):
@@ -171,9 +193,18 @@ class Enhance(Noise):
         Adds enhancements filters to the image.
     '''
 
-    def __init__(self, contrast=0, brightness=0, sharpness=0, color=0):
+    def __init__(self, contrast=0, brightness=0, sharpness=0, color=0, name='Enhance'):
+
+        if name is None:
+            raise ValueError()
+        if not all([item is not None and (isinstance(item, float) or isinstance(item, int)) for item in [contrast, brightness, sharpness, color]]):
+            raise ValueError
+        if sum([contrast, brightness, sharpness, color]) > 1:
+            raise ValueError
+        if not all(0 <= item <= 1 for item in [contrast, brightness, sharpness, color]):
+            raise ValueError
         super(Enhance, self).__init__()
-        self.name = 'Enhance'
+        self.name = name
 
         self.contrast = contrast
         self.brightness = brightness

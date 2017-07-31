@@ -258,7 +258,7 @@ class Symmetric(Layer):
 
         if name is None:
             raise ValueError()
-        if proba is None or not isinstance(proba, float) or not (0 <= proba <= 1):
+        if proba is None or not (isinstance(proba, float) or isinstance(proba, int)) or not (0 <= proba <= 1):
             raise ValueError('# TODO')
 
         self.proba = proba
