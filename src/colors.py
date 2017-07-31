@@ -15,7 +15,6 @@ class ColorRange(Color):
     def __init__(self, name='', red=None, green=None, blue=None, samples=None,
                     red_range=0, green_range=0, blue_range=0, colors=None):
 
-
         if name is None:
             raise ValueError('name must be different from None')
 
@@ -38,8 +37,10 @@ class ColorRange(Color):
             else:
                 if not all([color is not None for color in [red, green, blue]]):
                     raise ValueError('red, green and blue must be different from None, not {}'.format([red, green, blue]))
-                if not all([isinstance(color, tuple) and len(color) == 2 and 0 <= color[0] <= 255 for color in [red, green, blue]]):
+                if not all([isinstance(color, tuple) and len(color) == 2 and 0 <= color[0] <= 255 and 0 <= color[1] <= 255 for color in [red, green, blue]]):
                     raise ValueError('red, green and blue must be tuples of length 2 and their values must be between 0 and 255, not {}'.format([red, green, blue]))
+                if not all([color[0] <= color[1] for color in [red, green, blue]]):
+                    raise ValueError('red, green and blue tuples values must be in ascending order, not {}'.format([red, green, blue]))
                 red_low, red_high = red
                 green_low, green_high = green
                 blue_low, blue_high = blue
@@ -76,6 +77,9 @@ class Yellow(ColorRange):
 
 
     def __init__(self, name='yellow'):
+
+        if name is None:
+            raise ValueError('name must be different from None')
 
         local_samples = [(207, 188, 104), (203, 190, 125), (234, 214, 126),
                          (225, 212, 141), (248, 244, 146), (238, 215, 122),
@@ -158,8 +162,9 @@ class DarkShadow(ColorRange):
             for j in range(0, 30):
                 for k in range(0, 30):
                     t = (i, j, k)
-                    if t not in colors:
-                        colors.append(t)
+                    colors.append(t)
+
+        colors = list(set(colors))
 
         self.colors = colors
         self.name = name

@@ -43,6 +43,7 @@ class Layer():
     '''
 
     def __init__(self, name='Layer'):
+        if name is None: raise ValueError('name must be different from None')
         self.name = name
 
     def call(self, img):
@@ -65,6 +66,18 @@ class DrawLines(Layer):
                     color_range, name='DrawLines'):
 
         super(DrawLines, self).__init__()
+
+        if name is None: raise ValueError('name must be different from None')
+        if not all([r is not None and len(r)> 0 for r in [xy0_range, xy1_range, radius_range, thickness_range]]):
+            raise ValueError('#TODO')
+        if not all([all([isinstance(r, list) and len(r) == 2 for r in l]) for l in [xy0_range, xy1_range]]):
+            raise ValueError('#TODO')
+        if not all([all([isinstance(r, int) for r in l]) for l in [radius_range, thickness_range]]):
+            raise ValueError('Eoor')
+        if color_range is None:
+            raise ValueError
+        if len(color_range.colors) == 0:
+            raise ValueError
 
         self.xy0_range = xy0_range
         self.xy1_range = xy1_range
@@ -243,6 +256,11 @@ class Symmetric(Layer):
 
         super(Symmetric, self).__init__()
 
+        if name is None:
+            raise ValueError()
+        if proba is None or not isinstance(proba, float) or not (0 <= proba <= 1):
+            raise ValueError('# TODO')
+
         self.proba = proba
         self.name = name
 
@@ -273,6 +291,8 @@ class Perspective(Layer):
 
     def __init__(self, name='Perspective'):
 
+        if name is None: raise ValueError()
+
         super(Perspective, self).__init__()
 
         self.name = name
@@ -296,6 +316,9 @@ class Crop(Layer):
     '''
 
     def __init__(self, name='Crop'):
+
+        if name is None: raise ValueError()
+
         super(Crop, self).__init__()
 
         self.name = name
@@ -318,8 +341,11 @@ class Background(Layer):
     '''
 
     def __init__(self, n_backgrounds, path, n_rot=1, n_res=1, n_crop=1,
-                    input_size=(250, 200), width_range=None, angle_max=20):
+                    input_size=(250, 200), width_range=None, angle_max=20,
+                    name='Background'):
 
+        if name is None:
+            raise ValueError()
         if n_backgrounds <= 0:
             raise ValueError('The number of backgrounds to generate must be positive')
         if not isinstance(n_backgrounds, int):
@@ -330,12 +356,16 @@ class Background(Layer):
             raise ValueError('The path `{}` is not a directory'.format(path))
         if len(os.listdir(path)) == 0:
             raise ValueError('There are no images at path `{}`'.format(path))
-        if not all([item >= 0 for item in [n_rot, n_res, n_crop]]):
+        if not all([isinstance(item, int) and item >= 0 for item in [n_rot, n_res, n_crop]]):
             raise ValueError('The number of rotations, resizing and cropping must all be positive. Not `{}`'.format(str([n_rot, n_res, n_crop])))
         if not isinstance(input_size, tuple):
             raise ValueError('input_size must be a tuple : `{}`'.format(str(input_size)))
         if not (len(input_size) == 2):
             raise ValueError('input_size must be 2 dimensional: `{}`'.format(len(input_size)))
+        if not (isinstance(input_size[0], int) and isinstance(input_size[1], int) and input_size[0] >= 0 and input_size[1] >= 0):
+            raise ValueError('input_size must be 2 dimensional: `{}`'.format(len(input_size)))
+        if width_range is None or not isinstance(width_range, list) or len(width_range) == 0:
+            raise ValueError('')
 
         super(Background, self).__init__()
 
@@ -350,7 +380,7 @@ class Background(Layer):
         self.angles_range = [i for i in range(0, angle_max)] + [i for i in range(360-angle_max, 360)] + [i for i in range(180-angle_max, 180+angle_max)]
         self.backgrounds = self.generate_all_backgrounds()
 
-        self.name = 'Background'
+        self.name = name
 
     def generate_all_backgrounds(self):
         width, height = self.input_size

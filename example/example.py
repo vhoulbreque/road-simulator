@@ -19,14 +19,17 @@ from simulator import Simulator
 
 if __name__ == '__main__':
 
-    xy0_range = [[x, 200] for x in range(0, 250+1)]  # add bottom edge of the picture
-    xy1_range = [[0, y] for y in range(int(200/2), 0, -1)]  # add left edge of the picture
-    xy1_range += [[x, 0] for x in range(0, 250+1)]  # add top edge of the picture
-    xy1_range += [[249, y] for y in range(0, int(200/2))]  # add right edge of the picture
+    width_begin, height_begin = 250, 200
+    width_end, height_end = 250, 70
+
+    xy0_range = [[x, height_begin] for x in range(0, width_begin+1)]  # add bottom edge of the picture
+    xy1_range = [[0, y] for y in range(int(height_begin/2), 0, -1)]  # add left edge of the picture
+    xy1_range += [[x, 0] for x in range(0, width_begin+1)]  # add top edge of the picture
+    xy1_range += [[width_begin-1, y] for y in range(0, int(height_begin/2))]  # add right edge of the picture
     radius_range = list(range(200, 500)) + list(range(5000, 5300))
     thickness_range = [6, 7, 8, 9, 10]
 
-    width_range = [i for i in range(250, 750)]
+    width_range = [i for i in range(width_end, 750)]
     angle_max = 20
 
     white_range = White()
@@ -35,8 +38,14 @@ if __name__ == '__main__':
 
     color_range = white_range + yellow_range
 
-    background_layer = Background(n_backgrounds=3, path='../ground_pics', n_rot=1, n_res=1, n_crop=1, input_size=(250, 200), width_range=width_range, angle_max=angle_max)
-    lines_layer = DrawLines(xy0_range, xy1_range, radius_range, thickness_range, color_range)
+    background_layer = Background(n_backgrounds=3,
+                                    path='../ground_pics',
+                                    n_rot=1, n_res=1, n_crop=1,
+                                    input_size=(width_begin, height_begin),
+                                    width_range=width_range,
+                                    angle_max=angle_max)
+    lines_layer = DrawLines(xy0_range, xy1_range, radius_range,
+                            thickness_range, color_range)
     symmetry_layer = Symmetric(proba=0.5)
     shadow_layer = Shadows(color=shadow_colors)
     noisylines_layer = NoiseLines(color_range)

@@ -3,13 +3,29 @@ import os
 from random import randint
 from tqdm import tqdm
 
-from layers.layers import Background, DrawLines, Symmetric
+from layers.layers import Background, DrawLines, Symmetric, Layer
 
 
 class Simulator():
 
+    '''
+        The simulator is most importantly a list of layers.
+    '''
 
     def __init__(self, layers):
+
+        if layers is None:
+            raise ValueError('')
+        if not isinstance(layers, list):
+            raise ValueError('')
+        if not all([isinstance(l, Layer) for l in layers]):
+            raise ValueError('')
+        if len(layers) == 0:
+            raise ValueError('')
+        if not isinstance(layers[0], Background):
+            raise ValueError('')
+        if len(layers[0].backgrounds) == 0:
+            raise ValueError('')
 
         self.layers = layers
         self.input_images = layers[0].backgrounds
