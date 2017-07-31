@@ -27,7 +27,7 @@ if __name__ == '__main__':
     color_range = white_range + yellow_range
 
     background_layer = Background(n_backgrounds=100, path='gpics', n_rot=1, n_res=1, n_crop=1, input_size=(250, 200), width_range=width_range, angle_max=angle_max)
-    lines_layer = DrawLines(xy0_range, xy1_range, radius_range, thickness_range, color_range, white_range, yellow_range)
+    lines_layer = DrawLines(xy0_range, xy1_range, radius_range, thickness_range, color_range)
     symmetry_layer = Symmetric(proba=0.5)
     shadow_layer = Shadows(color=shadow_colors)
     noisylines_layer = NoiseLines(color_range)

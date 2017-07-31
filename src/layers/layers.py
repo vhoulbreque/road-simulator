@@ -1,3 +1,28 @@
+'''
+    All general layers objects.
+    A layer has 1 important functions: `call`. This is the function used to
+    manipulate the image that goes out of the former layer.
+
+    When you want to create a new layer on your own, you have to follow this
+    scheme:
+
+        class MyLayer(Layer):
+
+            def __init__(self, **args, **kwargs):
+                # The constructor of the class
+                ...
+
+            def call(self, img):
+                # Manipulate the img to do whatever the layer is supposed to do
+                ...
+
+            def summary():
+                # Gives information about what is in this layer
+                # Optional
+                ...
+
+'''
+
 import PIL
 import os
 import numpy as np
@@ -12,10 +37,16 @@ from basic_objects import Point, RoadLine, Circle
 
 class Layer():
 
-    def __init__(self):
-        self.name = 'Layer'
+    '''
+        Root Object of Layer.
+        By default, identity layer.
+    '''
+
+    def __init__(self, name='Layer'):
+        self.name = name
 
     def call(self, img):
+        if img is None: raise ValueError('img is None')
         return img
 
     def summary(self):
@@ -24,7 +55,14 @@ class Layer():
 
 class DrawLines(Layer):
 
-    def __init__(self, xy0_range, xy1_range, radius_range, thickness_range, color_range, white_range, yellow_range):
+    '''
+        This layer draws the border of the road (constituted of 2 lines.)
+        A line in the middle was available in a previous version. It is
+        coming soon.
+    '''
+
+    def __init__(self, xy0_range, xy1_range, radius_range, thickness_range,
+                    color_range, name='DrawLines'):
 
         super(DrawLines, self).__init__()
 
@@ -33,10 +71,8 @@ class DrawLines(Layer):
         self.radius_range = radius_range
         self.thickness_range = thickness_range
         self.color_range = color_range
-        self.white_range = white_range
-        self.yellow_range = yellow_range
 
-        self.name = 'DrawLines'
+        self.name = name
 
 
     def call(self, im):
@@ -89,6 +125,7 @@ class DrawLines(Layer):
                 line2.color = choice(color_range.colors)
                 width_noise = (1.4 + 3 * random()) * width
                 img = draw_lines(img, line1 - int(width_noise/2), line2 + int(width_noise/2), right_turn=right_turn)
+
             return img
 
         def draw_circle(draw, circle):
@@ -168,6 +205,8 @@ class DrawLines(Layer):
                 circle1 = Circle(center, radius,thickness=thickness, color=color)
                 draw_circle(draw, circle1)
 
+        if im is None: raise ValueError('img is None')
+
         img = im.copy()
 
         pose = Point(250/2, 200)
@@ -196,15 +235,20 @@ class DrawLines(Layer):
 
 
 class Symmetric(Layer):
+    '''
+        This layer creates the symmetric of an image.
+    '''
 
-    def __init__(self, proba=0.5):
+    def __init__(self, proba=0.5, name='Symmetric'):
 
         super(Symmetric, self).__init__()
 
         self.proba = proba
-        self.name = 'Symmetric'
+        self.name = name
 
     def call(self, img):
+
+        if img is None: raise ValueError('img is None')
 
         width, height = img.size
         sym = img.copy()
@@ -223,14 +267,19 @@ class Symmetric(Layer):
 
 
 class Perspective(Layer):
+    '''
+        This layer creates the perspective of an image.
+    '''
 
-    def __init__(self):
+    def __init__(self, name='Perspective'):
 
         super(Perspective, self).__init__()
 
-        self.name = 'Perspective'
+        self.name = name
 
     def call(self, img):
+
+        if img is None: raise ValueError('img is None')
 
         width, height = img.size
         from_points = [(0, 0), (249, 0), (249, 199), (0, 199)]
@@ -242,31 +291,51 @@ class Perspective(Layer):
 
 class Crop(Layer):
 
-    def __init__(self):
+    '''
+        This layer crops the image.
+    '''
+
+    def __init__(self, name='Crop'):
         super(Crop, self).__init__()
 
-        self.name = 'Crop'
+        self.name = name
 
     def call(self, img):
+        if img is None: raise ValueError('img is None')
+
         width = img.width
         height = img.height
         x_shift = 253
         img = img.crop((x_shift-1, 0, width-x_shift-1, height))
+
         return img
 
 
 class Background(Layer):
+    '''
+        This layer is an input layer.
+        It generates the inputs from background images.
+    '''
 
-    def __init__(self, n_backgrounds, path, n_rot=1, n_res=1, n_crop=1, input_size=(250, 200), width_range=None, angle_max=20):
+    def __init__(self, n_backgrounds, path, n_rot=1, n_res=1, n_crop=1,
+                    input_size=(250, 200), width_range=None, angle_max=20):
 
         if n_backgrounds <= 0:
-            raise Exception
+            raise ValueError('The number of backgrounds to generate must be positive')
+        if not isinstance(n_backgrounds, int):
+            raise ValueError('The number of backgrounds to generate must be an integer')
         if not os.path.exists(path):
-            raise Exception
+            raise ValueError('The path `{}` does not exist'.format(path))
         if not os.path.isdir(path):
-            raise Exception
+            raise ValueError('The path `{}` is not a directory'.format(path))
         if len(os.listdir(path)) == 0:
-            raise Exception
+            raise ValueError('There are no images at path `{}`'.format(path))
+        if not all([item >= 0 for item in [n_rot, n_res, n_crop]]):
+            raise ValueError('The number of rotations, resizing and cropping must all be positive. Not `{}`'.format(str([n_rot, n_res, n_crop])))
+        if not isinstance(input_size, tuple):
+            raise ValueError('input_size must be a tuple : `{}`'.format(str(input_size)))
+        if not (len(input_size) == 2):
+            raise ValueError('input_size must be 2 dimensional: `{}`'.format(len(input_size)))
 
         super(Background, self).__init__()
 
@@ -277,6 +346,7 @@ class Background(Layer):
         self.n_crop = n_crop
         self.input_size = input_size
         self.width_range = width_range
+        angle_max = angle_max % 360
         self.angles_range = [i for i in range(0, angle_max)] + [i for i in range(360-angle_max, 360)] + [i for i in range(180-angle_max, 180+angle_max)]
         self.backgrounds = self.generate_all_backgrounds()
 
@@ -341,7 +411,8 @@ class Background(Layer):
         return backgrounds
 
     def summary(self):
-        return '{}\t{}\t{}\t{}\t{}'.format(self.name, self.n_backgrounds, self.n_res, self.n_rot, self.n_crop)
+        return '{}\t{}\t{}\t{}\t{}'.format(self.name, self.n_backgrounds,
+                                            self.n_res, self.n_rot, self.n_crop)
 
 
 def find_coeffs(pa, pb):

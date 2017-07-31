@@ -1,3 +1,7 @@
+'''
+    Noise Layers are for now on just layers like the ones in layers.
+'''
+
 import PIL
 import os
 import sys
@@ -16,11 +20,16 @@ from layers.layers import Layer
 
 class Noise(Layer):
 
+    '''
+        Root Object of Noise.
+        By default, identity layer.
+    '''
+
     def __init__(self):
         self.name = 'Noise'
-        pass
 
     def call(self, img):
+        if img is None: raise ValueError('img is None')
         return img
 
     def summary(self):
@@ -28,6 +37,10 @@ class Noise(Layer):
 
 
 class Shadows(Noise):
+
+    '''
+        Adds shadows to the image.
+    '''
 
     def __init__(self, color):
 
@@ -38,25 +51,34 @@ class Shadows(Noise):
         self.color = color
         self.name = 'Shadows'
 
-
     def call(self, img):
+
+        if img is None: raise ValueError('img is None')
+
         x1 = randint(0, img.width)
         x2 = randint(0, img.width)
         y1 = randint(0, img.height)
         y2 = 10000000
-        while abs(y2 - y1) > 75:  # TODO: stop hardcoded values
+        c = choice(self.color.colors)
+
+        while abs(y2 - y1) > 75:
             if randint(0, 1):
                 y2 = randint(y1, img.height)
             else:
                 y2 = randint(0, y1)
-        c = choice(self.color.colors)
+
         draw = ImageDraw.Draw(img)
         draw.rectangle((x1, y1, x2, y2), fill=c, outline=c)
         del draw
+
         return img
 
 
 class Filter(Noise):
+
+    '''
+        Adds filters to the image.
+    '''
 
     def __init__(self, blur=0, gauss_blur=0, smooth=0, smooth_more=0, rank_filter=0):
         if blur + gauss_blur + smooth + smooth_more + rank_filter > 1:
@@ -71,23 +93,31 @@ class Filter(Noise):
         self.smooth = smooth
         self.smooth_more = smooth_more
         self.rank_filter = rank_filter
-        self.name = 'Filter'
 
+        self.name = 'Filter'
 
     def call(self, img):
 
+        if img is None: raise ValueError('img is None')
+
         im_n = img.copy()
 
-        n = randint(0, 5)
-        if n == 0:
+        gauss_blur_low, gauss_blur_high = 0, self.gauss_blur
+        blur_low, blur_high = gauss_blur_high, gauss_blur_high + self.blur
+        smooth_low, smooth_high = blur_high, blur_high + self.smooth
+        smooth_more_low, smooth_more_high = smooth_high, smooth_high + self.smooth_more
+        rank_low, rank_high = smooth_more_high, smooth_more_high + self.rank_filter
+
+        r = random()
+        if gauss_blur_low <= r <= gauss_blur_high:
             im_n = im_n.filter(ImageFilter.GaussianBlur(1))
-        elif n == 1:
+        elif blur_low < r <= blur_high:
             im_n = im_n.filter(ImageFilter.BLUR)
-        elif n == 2:
+        elif smooth_low < r <= smooth_high:
             im_n = im_n.filter(ImageFilter.SMOOTH)
-        elif n == 3:
+        elif smooth_more_low < r <= smooth_more_high:
             im_n = im_n.filter(ImageFilter.SMOOTH_MORE)
-        elif n == 4:
+        elif rank_low < r <= rank_high:
             im_n = im_n.filter(ImageFilter.RankFilter(size=3, rank=7))
         else:
             pass
@@ -96,11 +126,18 @@ class Filter(Noise):
 
 class NoiseLines(Noise):
 
-    def __init__(self, color_range):
+    '''
+        Adds noise lines to the image i.e. lines randomly on the picture.
+    '''
+
+    def __init__(self, color_range, n_lines_max=1, proba_line=0.33):
 
         super(NoiseLines, self).__init__()
 
         self.color_range = color_range
+        self.n_lines_max = n_lines_max
+        self.proba_line = proba_line
+
         self.name = 'NoiseLines'
 
 
@@ -112,9 +149,11 @@ class NoiseLines(Noise):
             del draw
             return im
 
-        n = randint(0, 1)
+        if img is None: raise ValueError('img is None')
+
+        n = randint(0, self.n_lines_max)
         for i in range(n):
-            if randint(0, 3) != 0: continue
+            if random() > self.proba_line: continue
             x1 = randint(0, img.width)
             x2 = randint(0, img.width)
             y1 = randint(0, img.height)
@@ -128,29 +167,44 @@ class NoiseLines(Noise):
 
 class Enhance(Noise):
 
+    '''
+        Adds enhancements filters to the image.
+    '''
+
     def __init__(self, contrast=0, brightness=0, sharpness=0, color=0):
         super(Enhance, self).__init__()
         self.name = 'Enhance'
 
+        self.contrast = contrast
+        self.brightness = brightness
+        self.sharpness = sharpness
+        self.color = color
 
     def call(self, img):
-        n = randint(0, 4)
+
+        if img is None: raise ValueError('img is None')
 
         im_n = img.copy()
 
-        if n == 0:
+        r = random()
+        contrast_low, contrast_high = 0, self.contrast
+        brightness_low, brightness_high = contrast_high, contrast_high + self.brightness
+        sharpness_low, sharpness_high = brightness_high, brightness_high + self.sharpness
+        color_low, color_high = sharpness_high, sharpness_high + self.color
+
+        if contrast_low <= r < contrast_high:
             factor_contrast = randint(5, 10)/10
             enhancer = ImageEnhance.Contrast(im_n)
             im_n = enhancer.enhance(factor_contrast)
-        elif n == 1:
+        elif brightness_low <= r < brightness_high:
             factor_brightness = randint(5, 15)/10
             enhancer = ImageEnhance.Brightness(im_n)
             im_n = enhancer.enhance(factor_brightness)
-        elif n == 2:
+        elif sharpness_low <= r < sharpness_high:
             factor_sharpen = randint(0, 20)/10
             enhancer = ImageEnhance.Sharpness(im_n)
             im_n = enhancer.enhance(factor_sharpen)
-        elif n == 3:
+        elif color_low <= r < color_high:
             factor_color = randint(0, 20)/10
             enhancer = ImageEnhance.Color(im_n)
             im_n = enhancer.enhance(factor_color)
