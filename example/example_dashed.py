@@ -1,7 +1,7 @@
 '''
     This is a toy example.
     It creates one hundred (70 * 250) RGB images of road lines as seen by a
-    1/10th scale car.
+    1/10th scale car with a dashed line in the middle.
     Saves these pictures in a folder called examples_pictures.
 '''
 
@@ -45,7 +45,8 @@ if __name__ == '__main__':
                                     width_range=width_range,
                                     angle_max=angle_max)
     lines_layer = DrawLines(xy0_range, xy1_range, radius_range,
-                            thickness_range, color_range)
+                            thickness_range, color_range,
+                            middle_line=(50, 30, 'dashed'))
     symmetry_layer = Symmetric(proba=0.5)
     shadow_layer = Shadows(color=shadow_colors)
     noisylines_layer = NoiseLines(color_range)
@@ -61,4 +62,4 @@ if __name__ == '__main__':
 
     print(simulator.summary())
 
-    simulator.generate(n_examples=100, path='sample_simple')
+    simulator.generate(n_examples=100, path='sample_dashed')

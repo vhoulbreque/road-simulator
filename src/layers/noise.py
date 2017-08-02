@@ -1,5 +1,5 @@
 '''
-    Noise Layers are for now on just layers like the ones in layers.
+    Noise Layers are for now on just layers like the 'normal' layers.
 '''
 
 import PIL

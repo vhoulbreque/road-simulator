@@ -63,7 +63,7 @@ class DrawLines(Layer):
     '''
 
     def __init__(self, xy0_range, xy1_range, radius_range, thickness_range,
-                    color_range, name='DrawLines'):
+                    color_range, middle_line=None, name='DrawLines'):
 
         super(DrawLines, self).__init__()
 
@@ -78,12 +78,27 @@ class DrawLines(Layer):
             raise ValueError
         if len(color_range.colors) == 0:
             raise ValueError
+        if middle_line is not None:
+            if len(middle_line) != 3:
+                raise ValueError()
+            if not all([(isinstance(middle_line[i], float) or isinstance(middle_line[i], int)) and middle_line[i] >= 0 for i in range(len(middle_line)-1)]):
+                raise ValueError()
+            if not middle_line[2] in [None, 'dashed', 'plain']:
+                raise ValueError()
 
         self.xy0_range = xy0_range
         self.xy1_range = xy1_range
         self.radius_range = radius_range
         self.thickness_range = thickness_range
         self.color_range = color_range
+        if middle_line is not None:
+            self.middle_line_plain = middle_line[0]
+            self.middle_line_empty = middle_line[1]
+            self.middle_line_type = middle_line[2]
+        else:
+            self.middle_line_plain = None
+            self.middle_line_empty = None
+            self.middle_line_type = None
 
         self.name = name
 
@@ -123,12 +138,26 @@ class DrawLines(Layer):
             return RoadLine(x0, y0, x1, y1, radius, thickness=thickness, color=color)
 
         def middleline2drawing(img, line, width=55, right_turn=True, color_range=None):
+
             # Real lines
             line1 = line.copy()
             line2 = line.copy()
+            middle_line = line.copy()
+
             line1.color = choice(color_range.colors)
             line2.color = choice(color_range.colors)
-            img = draw_lines(img, line1 - int(width/2), line2 + int(width/2), right_turn=right_turn)
+            middle_line.color = choice(color_range.colors)
+
+            draw = ImageDraw.Draw(img)
+
+            draw_line(draw, line1 - int(width/2), right_turn=right_turn)
+            draw_line(draw, line2 + int(width/2), right_turn=right_turn)
+            if self.middle_line_type == 'dashed':
+                draw_line(draw, middle_line, right_turn=right_turn,
+                            plain=self.middle_line_plain,
+                            empty=self.middle_line_empty)
+            elif self.middle_line_type == 'plain':
+                draw_line(draw, middle_line, right_turn=right_turn)
 
             # Noise lines
             if randint(0, 1):
@@ -136,8 +165,11 @@ class DrawLines(Layer):
                 line2 = line.copy()
                 line1.color = choice(color_range.colors)
                 line2.color = choice(color_range.colors)
+
                 width_noise = (1.4 + 3 * random()) * width
-                img = draw_lines(img, line1 - int(width_noise/2), line2 + int(width_noise/2), right_turn=right_turn)
+
+                draw_line(draw, line1 - int(width_noise/2), right_turn=right_turn)
+                draw_line(draw, line2 + int(width_noise/2), right_turn=right_turn)
 
             return img
 
@@ -196,7 +228,7 @@ class DrawLines(Layer):
             draw_line(draw, line2, right_turn=right_turn)
             return img
 
-        def draw_line(draw, line, right_turn=True):
+        def draw_line(draw, line, right_turn=True, plain=1, empty=0):
 
             if line.y1 > line.y0:
                 x0, y0 = line.x1, line.y1
@@ -216,6 +248,11 @@ class DrawLines(Layer):
                 color = line.color
 
                 circle1 = Circle(center, radius,thickness=thickness, color=color)
+
+                if empty != 0:
+                    circle1.plain = plain
+                    circle1.empty = empty
+
                 draw_circle(draw, circle1)
 
         if im is None: raise ValueError('img is None')
@@ -366,6 +403,11 @@ class Background(Layer):
             raise ValueError('input_size must be 2 dimensional: `{}`'.format(len(input_size)))
         if width_range is None or not isinstance(width_range, list) or len(width_range) == 0:
             raise ValueError('')
+        if max(width_range) < input_size[0]:
+            # Because resizing during generation needs to be done on a higher
+            # width
+            # TODO: not a good test
+            raise ValueError()
 
         super(Background, self).__init__()
 
