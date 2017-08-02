@@ -33,7 +33,7 @@ class Simulator():
     def generate(self, n_examples, path):
 
         if n_examples <= 0:
-            raise Exception
+            raise ValueError('n_examples must be strictly positive, not {}'.format(n_examples))
 
         if os.path.exists(path):
             print('The path `{}` already exists !'.format(path))
@@ -45,9 +45,11 @@ class Simulator():
             ii = self.input_images[index].copy()
             new_img, new_name = self.generate_one_image(ii)
             new_img.save(os.path.join(path, 'frame_' + str(i) + new_name))
-        print('DONE')
 
     def generate_one_image(self, img):
+
+        if img is None:
+            raise ValueError('img must be different from None')
 
         sym = False
 
@@ -55,11 +57,11 @@ class Simulator():
         for layer in self.layers:
             if not isinstance(layer, Background):
                 if isinstance(layer, DrawLines):
-                    im, angle, gas = layer.call(im)  # Arguments
+                    im, angle, gas = layer.call(im)
                 elif isinstance(layer, Symmetric):
-                    im, sym = layer.call(im)  # Arguments
+                    im, sym = layer.call(im)
                 else:
-                    im = layer.call(im)  # Arguments
+                    im = layer.call(im)
 
         if sym:
             angle = -angle

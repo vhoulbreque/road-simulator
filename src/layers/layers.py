@@ -15,6 +15,7 @@
             def call(self, img):
                 # Manipulate the img to do whatever the layer is supposed to do
                 ...
+                return img
 
             def summary():
                 # Gives information about what is in this layer
@@ -67,24 +68,27 @@ class DrawLines(Layer):
 
         super(DrawLines, self).__init__()
 
-        if name is None: raise ValueError('name must be different from None')
-        if not all([r is not None and len(r)> 0 for r in [xy0_range, xy1_range, radius_range, thickness_range]]):
-            raise ValueError('#TODO')
-        if not all([all([isinstance(r, list) and len(r) == 2 for r in l]) for l in [xy0_range, xy1_range]]):
-            raise ValueError('#TODO')
+        if name is None:
+            raise ValueError('name must be different from None')
+        if not all([r is not None and len(r)> 0 and isinstance(r, list) for r in [xy0_range, xy1_range, radius_range, thickness_range]]):
+            raise ValueError('xy0_range, xy1_range, radius_range and thickness_range must not be None or empty lists')
+        if not all([all([isinstance(r, list) for r in l]) for l in [radius_range, thickness_range]]):
+            raise ValueError('xy0_range and xy1_range must be composed of lists')
+        if not all([all([len(r) == 2 for r in l]) for l in [xy0_range, xy1_range]]):
+            raise ValueError('xy0_range and xy1_range must be lists of 2 item long lists')
         if not all([all([isinstance(r, int) for r in l]) for l in [radius_range, thickness_range]]):
-            raise ValueError('Eoor')
+            raise ValueError('radius_range and thickness_range must be composed of integers')
         if color_range is None:
-            raise ValueError
+            raise ValueError('color_range must be different from None')
         if len(color_range.colors) == 0:
-            raise ValueError
+            raise ValueError('color_range must have at least one color')
         if middle_line is not None:
             if len(middle_line) != 3:
-                raise ValueError()
+                raise ValueError('middle_line needs to be a tuple of length 3 when not None')
             if not all([(isinstance(middle_line[i], float) or isinstance(middle_line[i], int)) and middle_line[i] >= 0 for i in range(len(middle_line)-1)]):
-                raise ValueError()
+                raise ValueError('The 2 first elements of middle_line must be int or float')
             if not middle_line[2] in [None, 'dashed', 'plain']:
-                raise ValueError()
+                raise ValueError('The third element of middle_line must be None, \'dashed\' or \'plain\'')
 
         self.xy0_range = xy0_range
         self.xy1_range = xy1_range
@@ -255,7 +259,8 @@ class DrawLines(Layer):
 
                 draw_circle(draw, circle1)
 
-        if im is None: raise ValueError('img is None')
+        if im is None:
+            raise ValueError('img is None')
 
         img = im.copy()
 
@@ -294,16 +299,17 @@ class Symmetric(Layer):
         super(Symmetric, self).__init__()
 
         if name is None:
-            raise ValueError()
+            raise ValueError('name must be different from None')
         if proba is None or not (isinstance(proba, float) or isinstance(proba, int)) or not (0 <= proba <= 1):
-            raise ValueError('# TODO')
+            raise ValueError('The probability must be a float or integer and 0 <= proba <= 1')
 
         self.proba = proba
         self.name = name
 
     def call(self, img):
 
-        if img is None: raise ValueError('img is None')
+        if img is None:
+            raise ValueError('img is None')
 
         width, height = img.size
         sym = img.copy()
@@ -328,7 +334,8 @@ class Perspective(Layer):
 
     def __init__(self, name='Perspective'):
 
-        if name is None: raise ValueError()
+        if name is None:
+            raise ValueError('name must be different from None')
 
         super(Perspective, self).__init__()
 
@@ -336,7 +343,8 @@ class Perspective(Layer):
 
     def call(self, img):
 
-        if img is None: raise ValueError('img is None')
+        if img is None:
+            raise ValueError('img is None')
 
         width, height = img.size
         from_points = [(0, 0), (249, 0), (249, 199), (0, 199)]
@@ -354,7 +362,8 @@ class Crop(Layer):
 
     def __init__(self, name='Crop'):
 
-        if name is None: raise ValueError()
+        if name is None:
+            raise ValueError('name must be different from None')
 
         super(Crop, self).__init__()
 
@@ -382,7 +391,7 @@ class Background(Layer):
                     name='Background'):
 
         if name is None:
-            raise ValueError()
+            raise ValueError('name must be different from None')
         if n_backgrounds <= 0:
             raise ValueError('The number of backgrounds to generate must be positive')
         if not isinstance(n_backgrounds, int):
@@ -402,7 +411,7 @@ class Background(Layer):
         if not (isinstance(input_size[0], int) and isinstance(input_size[1], int) and input_size[0] >= 0 and input_size[1] >= 0):
             raise ValueError('input_size must be 2 dimensional: `{}`'.format(len(input_size)))
         if width_range is None or not isinstance(width_range, list) or len(width_range) == 0:
-            raise ValueError('')
+            raise ValueError('width_range must be a non-empty list')
         if max(width_range) < input_size[0]:
             # Because resizing during generation needs to be done on a higher
             # width
@@ -435,6 +444,7 @@ class Background(Layer):
             background = Image.open(os.path.join(self.path, image_names[index])).convert('RGB')
             backgrounds.append(background)
 
+        # Generation of the rotations
         new_backgrounds = []
         for i in tqdm(range(len(backgrounds)), desc='rotating images'):
             background = backgrounds[i]
@@ -450,6 +460,7 @@ class Background(Layer):
             shuffle(backgrounds)
             backgrounds = backgrounds[:self.n_backgrounds]
 
+        # Generation of the resized images
         new_backgrounds = []
         for i in tqdm(range(len(backgrounds)), desc='resizing images'):
             for j in range(self.n_res):
@@ -466,8 +477,9 @@ class Background(Layer):
             shuffle(backgrounds)
             backgrounds = backgrounds[:self.n_backgrounds]
 
+        # Generation of the cropped images
         new_backgrounds = []
-        for i in tqdm(range(len(backgrounds)), desc='loading images'):
+        for i in tqdm(range(len(backgrounds)), desc='cropping images'):
             background = backgrounds[i]
             for j in range(self.n_crop):
                 b = background.copy()
@@ -487,6 +499,8 @@ class Background(Layer):
                                             self.n_res, self.n_rot, self.n_crop)
 
 
+# Function to find the points to apply a transformation between 2 points in an
+# image
 def find_coeffs(pa, pb):
     matrix = []
     for p1, p2 in zip(pa, pb):
