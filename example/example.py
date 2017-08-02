@@ -5,9 +5,7 @@
     Saves these pictures in a folder called examples_pictures.
 '''
 
-import os
 import sys
-import numpy as np
 
 sys.path.insert(0, '../src/')
 
