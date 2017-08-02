@@ -12,28 +12,33 @@ class Simulator():
         The simulator is most importantly a list of layers.
     '''
 
-    def __init__(self, layers):
+    def __init__(self, layers=None):
 
         if layers is None:
-            raise ValueError('')
+            layers = []
         if not isinstance(layers, list):
             raise ValueError('')
-        if not all([isinstance(l, Layer) for l in layers]):
-            raise ValueError('')
-        if len(layers) == 0:
-            raise ValueError('')
-        if not isinstance(layers[0], Background):
-            raise ValueError('')
-        if len(layers[0].backgrounds) == 0:
+        if layers != [] and not all([isinstance(l, Layer) for l in layers]):
             raise ValueError('')
 
         self.layers = layers
-        self.input_images = layers[0].backgrounds
+        self.input_images = None
+
+    def add(self, layer):
+        self.layers.append(layer)
 
     def generate(self, n_examples, path):
 
         if n_examples <= 0:
             raise ValueError('n_examples must be strictly positive, not {}'.format(n_examples))
+        if len(self.layers) == 0:
+            raise ValueError('there are no layers in the simulator model')
+        if not isinstance(self.layers[0], Background):
+            raise ValueError('')
+        if len(self.layers[0].backgrounds) == 0:
+            raise ValueError('')
+
+        self.input_images = self.layers[0].backgrounds
 
         if os.path.exists(path):
             print('The path `{}` already exists !'.format(path))

@@ -63,32 +63,49 @@ class DrawLines(Layer):
         coming soon.
     '''
 
-    def __init__(self, xy0_range, xy1_range, radius_range, thickness_range,
-                    color_range, middle_line=None, name='DrawLines'):
+    def __init__(self, xy0_range=None, xy1_range=None, radius_range=None,
+                    thickness_range=None, color_range=None, middle_line=None,
+                    name='DrawLines', input_size=(250, 200)):
 
         super(DrawLines, self).__init__()
 
-        if name is None:
-            raise ValueError('name must be different from None')
-        if not all([r is not None and len(r)> 0 and isinstance(r, list) for r in [xy0_range, xy1_range, radius_range, thickness_range]]):
-            raise ValueError('xy0_range, xy1_range, radius_range and thickness_range must not be None or empty lists')
-        if not all([all([isinstance(r, list) for r in l]) for l in [radius_range, thickness_range]]):
-            raise ValueError('xy0_range and xy1_range must be composed of lists')
-        if not all([all([len(r) == 2 for r in l]) for l in [xy0_range, xy1_range]]):
-            raise ValueError('xy0_range and xy1_range must be lists of 2 item long lists')
-        if not all([all([isinstance(r, int) for r in l]) for l in [radius_range, thickness_range]]):
-            raise ValueError('radius_range and thickness_range must be composed of integers')
+        width_begin, height_begin = input_size
+
+        if xy0_range is None:
+            xy0_range = [[x, height_begin] for x in range(0, width_begin+1)]
+        if xy1_range is None:
+            xy1_range = [[0, y] for y in range(int(height_begin/2), 0, -1)]
+            xy1_range += [[x, 0] for x in range(0, width_begin+1)]
+            xy1_range += [[width_begin-1, y] for y in range(0, int(height_begin/2))]
+        if radius_range is None:
+            radius_range = list(range(200, 500)) + list(range(5000, 5300))
+        if thickness_range is None:
+            thickness_range = [6, 7, 8, 9, 10]
         if color_range is None:
-            raise ValueError('color_range must be different from None')
-        if len(color_range.colors) == 0:
-            raise ValueError('color_range must have at least one color')
-        if middle_line is not None:
-            if len(middle_line) != 3:
-                raise ValueError('middle_line needs to be a tuple of length 3 when not None')
-            if not all([(isinstance(middle_line[i], float) or isinstance(middle_line[i], int)) and middle_line[i] >= 0 for i in range(len(middle_line)-1)]):
-                raise ValueError('The 2 first elements of middle_line must be int or float')
-            if not middle_line[2] in [None, 'dashed', 'plain']:
-                raise ValueError('The third element of middle_line must be None, \'dashed\' or \'plain\'')
+            from colors import White, Yellow
+            color_range = White() + Yellow()
+
+        # if name is None:
+        #     raise ValueError('name must be different from None')
+        # if not all([r is not None and len(r)> 0 and isinstance(r, list) for r in [xy0_range, xy1_range, radius_range, thickness_range]]):
+        #     raise ValueError('xy0_range, xy1_range, radius_range and thickness_range must not be None or empty lists')
+        # if not all([all([isinstance(r, list) for r in l]) for l in [xy0_range, xy1_range]]):
+        #     raise ValueError('xy0_range and xy1_range must be composed of lists')
+        # if not all([all([len(r) == 2 for r in l]) for l in [xy0_range, xy1_range]]):
+        #     raise ValueError('xy0_range and xy1_range must be lists of 2 item long lists')
+        # if not all([all([isinstance(r, int) for r in l]) for l in [radius_range, thickness_range]]):
+        #     raise ValueError('radius_range and thickness_range must be composed of integers')
+        # if color_range is None:
+        #     raise ValueError('color_range must be different from None')
+        # if len(color_range.colors) == 0:
+        #     raise ValueError('color_range must have at least one color')
+        # if middle_line is not None:
+        #     if len(middle_line) != 3:
+        #         raise ValueError('middle_line needs to be a tuple of length 3 when not None')
+        #     if not all([(isinstance(middle_line[i], float) or isinstance(middle_line[i], int)) and middle_line[i] >= 0 for i in range(len(middle_line)-1)]):
+        #         raise ValueError('The 2 first elements of middle_line must be int or float')
+        #     if not middle_line[2] in [None, 'dashed', 'plain']:
+        #         raise ValueError('The third element of middle_line must be None, \'dashed\' or \'plain\'')
 
         self.xy0_range = xy0_range
         self.xy1_range = xy1_range
@@ -105,7 +122,6 @@ class DrawLines(Layer):
             self.middle_line_type = None
 
         self.name = name
-
 
     def call(self, im):
 
@@ -387,36 +403,44 @@ class Background(Layer):
     '''
 
     def __init__(self, n_backgrounds, path, n_rot=1, n_res=1, n_crop=1,
-                    input_size=(250, 200), width_range=None, angle_max=20,
-                    name='Background'):
+                    input_size=(250, 200), output_size=(250, 70),
+                    width_range=None, angle_max=20, name='Background'):
+
+        if width_range is None:
+            width_range = [i for i in range(output_size[0], output_size[0] + 500)]
 
         if name is None:
             raise ValueError('name must be different from None')
-        if n_backgrounds <= 0:
-            raise ValueError('The number of backgrounds to generate must be positive')
+
         if not isinstance(n_backgrounds, int):
             raise ValueError('The number of backgrounds to generate must be an integer')
+        if n_backgrounds <= 0:
+            raise ValueError('The number of backgrounds to generate must be positive')
+
         if not os.path.exists(path):
             raise ValueError('The path `{}` does not exist'.format(path))
         if not os.path.isdir(path):
             raise ValueError('The path `{}` is not a directory'.format(path))
         if len(os.listdir(path)) == 0:
             raise ValueError('There are no images at path `{}`'.format(path))
+
         if not all([isinstance(item, int) and item >= 0 for item in [n_rot, n_res, n_crop]]):
             raise ValueError('The number of rotations, resizing and cropping must all be positive. Not `{}`'.format(str([n_rot, n_res, n_crop])))
+
         if not isinstance(input_size, tuple):
             raise ValueError('input_size must be a tuple : `{}`'.format(str(input_size)))
         if not (len(input_size) == 2):
             raise ValueError('input_size must be 2 dimensional: `{}`'.format(len(input_size)))
         if not (isinstance(input_size[0], int) and isinstance(input_size[1], int) and input_size[0] >= 0 and input_size[1] >= 0):
             raise ValueError('input_size must be 2 dimensional: `{}`'.format(len(input_size)))
-        if width_range is None or not isinstance(width_range, list) or len(width_range) == 0:
-            raise ValueError('width_range must be a non-empty list')
+
+        if not isinstance(width_range, list) or len(width_range) == 0:
+            raise ValueError('width_range must be a non-empty list or None')
         if max(width_range) < input_size[0]:
             # Because resizing during generation needs to be done on a higher
             # width
             # TODO: not a good test
-            raise ValueError()
+            raise ValueError('TODO')
 
         super(Background, self).__init__()
 
