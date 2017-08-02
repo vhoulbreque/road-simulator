@@ -74,6 +74,24 @@ class TestLayer():
         def instantiate_thicknesstuple():
             c = White()
             return DrawLines(xy0_range=[(20, 20)], xy1_range=[(20, 20)], radius_range=[10, 11], thickness_range=[(2, 10)], color_range=c)
+        def instantiate_middlelineallnone():
+            c = White()
+            return DrawLines(xy0_range=[(20, 20)], xy1_range=[(20, 20)], radius_range=[10, 11], thickness_range=[2, 10], color_range=c, middle_line=(None, None, None))
+        def instantiate_plainfloat():
+            c = White()
+            return DrawLines(xy0_range=[(20, 20)], xy1_range=[(20, 20)], radius_range=[10, 11], thickness_range=[(2, 10)], color_range=c, middle_line=(1.2, 10, None))
+        def instantiate_typenoneonly():
+            c = White()
+            return DrawLines(xy0_range=[(20, 20)], xy1_range=[(20, 20)], radius_range=[10, 11], thickness_range=[(2, 10)], color_range=c, middle_line=(10, 20, None))
+        def instantiate_typeint():
+            c = White()
+            return DrawLines(xy0_range=[(20, 20)], xy1_range=[(20, 20)], radius_range=[10, 11], thickness_range=[(2, 10)], color_range=c, middle_line=(10, 20, 10))
+        def instantiate_emptynegative():
+            c = White()
+            return DrawLines(xy0_range=[(20, 20)], xy1_range=[(20, 20)], radius_range=[10, 11], thickness_range=[(2, 10)], color_range=c, middle_line=(14, -3, 'dashed'))
+        def instantiate_typenotgood():
+            c = White()
+            return DrawLines(xy0_range=[(20, 20)], xy1_range=[(20, 20)], radius_range=[10, 11], thickness_range=[(2, 10)], color_range=c, middle_line=(10, 20, 'dashed '))
         def call_none():
             c = White()
             d = DrawLines(xy0_range=[(20, 20)], xy1_range=[(20, 20)], radius_range=[10, 11], thickness_range=[2, 10], color_range=c)
@@ -87,6 +105,12 @@ class TestLayer():
         assert_raises(ValueError, instantiate_colornone)
         assert_raises(ValueError, instantiate_xy0notuple)
         assert_raises(ValueError, instantiate_thicknesstuple)
+        assert_raises(ValueError, instantiate_middlelineallnone)
+        assert_raises(ValueError, instantiate_plainfloat)
+        assert_raises(ValueError, instantiate_typenoneonly)
+        assert_raises(ValueError, instantiate_typeint)
+        assert_raises(ValueError, instantiate_emptynegative)
+        assert_raises(ValueError, instantiate_typenotgood)
         assert_raises(ValueError, call_none)
 
     # Symmetric
@@ -134,7 +158,6 @@ class TestLayer():
         assert_raises(ValueError, instantiate_name_none)
         assert_raises(ValueError, call_none)
 
-
     # Background
     def test_background(self):
 
@@ -160,6 +183,10 @@ class TestLayer():
             return Background(n_backgrounds=10, path='../ground_pics', width_range=(99, 100))
         def instantiate_widthemptylist():
             return Background(n_backgrounds=10, path='../ground_pics', width_range=[])
+        def instantiate_widthtoolittle():
+            return Background(n_backgrounds=10, path='../ground_pics', input_size=(250, 200), width_range=[32, 33])
+        def instantiate_nowidth():
+            return Background(n_backgrounds=10, path='../ground_pics')
         def call_none():
             d = Crop()
             d.call(None)
@@ -175,4 +202,6 @@ class TestLayer():
         assert_raises(ValueError, instantiate_widthnone)
         assert_raises(ValueError, instantiate_widthnotlist)
         assert_raises(ValueError, instantiate_widthemptylist)
+        assert_raises(ValueError, instantiate_widthtoolittle)
+        assert_raises(ValueError, instantiate_nowidth)
         assert_raises(ValueError, call_none)

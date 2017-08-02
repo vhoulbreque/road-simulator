@@ -56,3 +56,11 @@ class TestSimulator():
         assert_raises(ValueError, instantiate_layersliststr)
         assert_raises(ValueError, instantiate_layernobackgroundfirst)
         assert_raises(ValueError, instantiate_backgroundemptylist)
+
+        l1 = Background(n_backgrounds=3, path='../ground_pics', width_range=[749, 750])
+        l2 = Crop()
+        l3 = Perspective()
+        l4 = Symmetric()
+
+        simulator = Simulator(layers=[l1, l2, l3, l4])
+        assert_equal([layer.name for layer in simulator.layers], ['Background', 'Crop', 'Perspective', 'Symmetric'])
