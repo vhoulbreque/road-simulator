@@ -10,5 +10,7 @@ __pycache__
 .pyc
 
 example/examples_pictures/
+example/sample_dashed/
+example/sample_simple/
 
 ground_pics/
