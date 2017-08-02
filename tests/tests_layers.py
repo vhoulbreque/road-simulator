@@ -29,7 +29,7 @@ class TestLayer():
         """This method is run once after _each_ test method is executed"""
 
     # Layer
-    def test_init_not_none(self):
+    def test_layer(self):
 
         def instantiate_none():
             return Layer(name=None)

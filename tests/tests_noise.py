@@ -29,8 +29,8 @@ class TestLayer():
     def teardown(self):
         """This method is run once after _each_ test method is executed"""
 
-    # Layer
-    def test_init_not_none(self):
+    # Noise
+    def test_noise(self):
 
         def instantiate_namenone():
             return Noise(name=None)
