@@ -3,6 +3,8 @@
 The road_simulator is part of the 'ironcar' project.
 To see what the ironcar project is, go to the [ironcar repository](https://github.com/vinzeebreak/ironcar).
 
+This simulator generates 'false' pictures of a road as seen by a 1/10th car with a wide angle camera. We used it to get (250 * 70) RGB dimensional images. It is quite fast (I mean, at least faster than driving the car ourselves), and far more accurate in the learning process (less approximations of curves etc).
+
 ## Getting started
 
 ```python
