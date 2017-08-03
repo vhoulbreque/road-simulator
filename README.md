@@ -15,9 +15,10 @@ With the model created in `example/model_cnn.py` and a dataset of 100,000 images
 
 ## Getting started
 
+The following code is meant to be in the road_simulator directory. Please adapt `./src/` and `./ground_pics`to fit your curent layout.
 ```python
 import sys
-sys.path.insert(0, '../src/')
+sys.path.insert(0, './src/')
 ```
 
 Each simulator is composed of layers to make it is easy to adapt to your particular situation/track. The simpliest type of generator is the default `Simulator` object:
@@ -35,7 +36,7 @@ from layers.layers import Background, DrawLines, Perspective, Crop
 
 white = White()
 
-simulator.add(Background(n_backgrounds=3, path='../ground_pics', input_size=(250, 200)))
+simulator.add(Background(n_backgrounds=3, path='./ground_pics', input_size=(250, 200)))
 simulator.add(DrawLines(input_size=(250, 200), color_range=white))
 simulator.add(Perspective())
 simulator.add(Crop())
