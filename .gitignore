@@ -1,15 +1,15 @@
-.ipynb_checkpoints
-.ipynb
+*.ipynb_checkpoints
+*.ipynb
 
-.coverage
+*.coverage
 
-.hdf5
+*.hdf5
 
 dataset/
 notebooks/
 
 __pycache__
-.pyc
+*.pyc
 
 example/examples_pictures/
 example/sample_dashed/
