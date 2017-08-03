@@ -12,11 +12,11 @@ from models.utils import get_datasets
 
 
 paths = ['sample_simple', 'sample_dashed', 'my_dataset']
-n_dataset = 100 * 1000  # number of images
+n_images = 100 * 1000  # number of images
 model_path = 'my_autopilot.hdf5'
 
 # Get train, test and val sets
-train_X, train_Y, val_X, val_Y, test_X, test_Y = get_datasets(paths, limit=n_dataset)
+train_X, train_Y, val_X, val_Y, test_X, test_Y = get_datasets(paths, n_images=n_images)
 
 print('train_X[0]: ', train_X[0])
 print('train_Y[0]: ', train_Y[0])
@@ -61,7 +61,7 @@ adam = Adam()
 model = Model(input=[img_in], output=[angle_out])
 model.compile(optimizer=adam, loss='categorical_crossentropy', metrics=['accuracy'])
 
-print(model.summary())
+model.summary()
 
 #Save the model after each epoch if the validation loss improved.
 save_best = callbacks.ModelCheckpoint(model_path,

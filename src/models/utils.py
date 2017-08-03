@@ -6,17 +6,20 @@ from scipy.misc import imread
 from random import shuffle
 
 
-def get_images(paths, limit=1000):
+def get_images(paths, n_images=1000):
+
+    if isinstance(paths, str):
+        paths = [paths]
 
     images = []
     labels = []
 
     n = 0
     for path in paths:
-        if n > limit: break
+        if n > n_images: break
         print(path)
         for image_file in tqdm(os.listdir(path)):
-            if n > limit: break
+            if n > n_images: break
             if '.jpg' not in image_file: continue
             try:
                 img = imread(os.path.join(path, image_file))
@@ -92,9 +95,9 @@ def equilibrate_dataset(X, Y, ns):
     return np.array(all_X), np.array(all_Y)
 
 
-def get_datasets(paths, limit):
+def get_datasets(paths, n_images):
 
-    X, Y = get_images(paths, limit=limit)
+    X, Y = get_images(paths, n_images=n_images)
 
     # A classifier is better (when talking about performance) than a simple
     # sigmoid

@@ -3,6 +3,8 @@
 
 .coverage
 
+.hdf5
+
 dataset/
 notebooks/
 
