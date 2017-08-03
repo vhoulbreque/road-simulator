@@ -3,9 +3,9 @@
 The road_simulator is part of the 'ironcar' project.
 To see what the ironcar project is, go to the [ironcar repository](https://github.com/vinzeebreak/ironcar).
 
-This simulator generates 'false' pictures of a road as seen by a 1/10th car with a wide angle camera. We used it to get (250 * 70) RGB dimensional images. It is quite fast (I mean, at least faster than driving the car ourselves), and far more accurate in the learning process (less approximations of curves etc).
+This simulator generates 'fake' pictures of a road as seen by a 1/10th car with a wide angle camera. We used it to get (250 * 70) RGB dimensional images. It is quite fast (I mean, at least faster than driving the car ourselves), and far more accurate in the learning process (less approximations of curves etc).
 
-These are examples of what can be generated (very simply):
+These are examples of what can be (very easily) generated:
 
 ![dashed line 1](images/example0.jpg)  ![dashed line 2](images/example1.jpg)  ![dashed line 3](images/example2.jpg)  ![dashed line 4](images/example4.jpg)  
 
@@ -20,7 +20,7 @@ import sys
 sys.path.insert(0, '../src/')
 ```
 
-In this simulator, each model of generation is composed of layers. The simpliest type of generator is the `Simulator`.
+Each simulator is composed of layers to make it is easy to adapt to your particular situation/track. The simpliest type of generator is the default `Simulator` object:
 ```python
 from simulator import Simulator
 
@@ -41,12 +41,16 @@ simulator.add(Perspective())
 simulator.add(Crop())
 ```
 
-White object gives a range of white-ish colors to draw the lines. They may not appear exactly white on the images.  
+White object gives a range of white-ish colors to draw the lines. They may not appear exactly white on the images. 
+There exists three colors for now (Yellow, White and DarkShadow). You can add more colors by replicating the yellow example.
+
 Now, let's generate the images. We just need to write:
 
 ```python
 simulator.generate(n_examples=100, path='my_dataset')
 ```
+where you need to set the number of images to be generated `n_examples` and the path you want them to be generated in `path`.
+
 
 ## Creating a model
 
@@ -58,8 +62,9 @@ from models.utils import get_datasets
 
 train_X, train_Y, val_X, val_Y, _, _ = get_datasets('my_dataset', n_images=1000)
 ```
+where `n_images` is the maximum number of images you want to get from the dataset 'my_dataset'.
 
-Now, just create the model you want, like in keras:
+Now, just create the model you want, using keras:
 
 ```python
 from keras.layers import Input, Convolution2D, MaxPooling2D, Activation
