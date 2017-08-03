@@ -5,6 +5,13 @@ To see what the ironcar project is, go to the [ironcar repository](https://githu
 
 This simulator generates 'false' pictures of a road as seen by a 1/10th car with a wide angle camera. We used it to get (250 * 70) RGB dimensional images. It is quite fast (I mean, at least faster than driving the car ourselves), and far more accurate in the learning process (less approximations of curves etc).
 
+These are examples of what can be generated (very simply):
+
+![dashed line 1](images/example0.jpg)  ![dashed line 2](images/example1.jpg)  ![dashed line 3](images/example2.jpg)  ![dashed line 4](images/example4.jpg)  
+
+![plain line 1](images/example5.jpg)  ![plain line 2](images/example6.jpg)  ![plain line 3](images/example7.jpg)  ![plain line 4](images/example8.jpg)  
+
+
 ## Getting started
 
 ```python
