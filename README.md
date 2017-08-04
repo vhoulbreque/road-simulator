@@ -1,7 +1,8 @@
 # Road Simulator
 
 The road_simulator is part of the 'ironcar' project.
-To see what the ironcar project is, go to the [ironcar repository](https://github.com/vinzeebreak/ironcar).
+To see what the ironcar project is, go to the [ironcar repository](https://github.com/vinzeebreak/ironcar).  
+If you want to get the full tutorial for the entire project (ironcar hardware, software, simulator and model generation, you can also go [there](https://docs.google.com/document/d/1jyRhlbmthMA_DuuulYnzUT38okIF_KFZH0a4hh8NCg8/edit?usp=sharing).
 
 This simulator generates 'fake' pictures of a road as seen by a 1/10th car with a wide angle camera and creates a deep-learning model based on these images. We used it to get (250 * 70) RGB dimensional track pictures. It is quite fast (we can generate 100,000 images in 15 minutes which is faster than driving the car ourselves and capturing the images), and far more accurate in the learning process (less approximations of curves etc).
 
