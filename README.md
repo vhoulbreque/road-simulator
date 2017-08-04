@@ -11,8 +11,8 @@ These are examples of what can be (very easily) generated:
 |Some |examples |generated|...
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
 ![dashed line 1](images/example0.jpg)  |  ![dashed line 2](images/example1.jpg)|  ![dashed line 3](images/example2.jpg)|  ![dashed line 4](images/example4.jpg)  
-![plain line 1](images/example5.jpg)  |  ![plain line 2](images/example6.jpg)|  ![plain line 3](images/example7.jpg)|  ![plain line 4](images/example8.jpg) 
-![dashed line 5](images/example3.jpg)  | ![plain_line_5](images/example9.jpg)  | ![plain_line_6](images/example10.jpg)  |
+![plain line 1](images/example5.jpg)  |  ![plain line 2](images/example6.jpg)|  ![plain line 3](images/example7.jpg)|  ![plain line 4](images/example8.jpg)
+![dashed line 5](images/example3.jpg)  | ![plain_line_5](images/example9.jpg)  | ![plain_line_6](images/example10.jpg)  |![plain_line_7](images/example11.jpg)  
 
 
 With the model created in `example/model_cnn.py` and a dataset of 100,000 images created via simulator, we achieved a 94% accuracy and managed to get our car to successfully finish a lap on 2 different circuits it had never seen before !
@@ -46,7 +46,7 @@ simulator.add(Perspective())
 simulator.add(Crop())
 ```
 
-White object gives a range of white-ish colors to draw the lines. They may not appear exactly white on the images. 
+White object gives a range of white-ish colors to draw the lines. They may not appear exactly white on the images.
 There exists three colors for now (Yellow, White and DarkShadow) and a generic Color class. You can add more colors by replicating the yellow example.
 
 Now, let's generate the images. We just need to write:
