@@ -15,13 +15,13 @@ With the model created in `example/model_cnn.py` and a dataset of 100,000 images
 
 ## Getting started
 
-The following code is meant to be in the road_simulator directory. Please adapt `./src/` and `./ground_pics`to fit your curent layout.
+The following code is meant to be in the road_simulator directory. Please adapt `./src/` and `./ground_pics`to fit your current layout.
 ```python
 import sys
 sys.path.insert(0, './src/')
 ```
 
-Each simulator is composed of layers to make it is easy to adapt to your particular situation/track. The simpliest type of generator is the default `Simulator` object:
+Each simulator is composed of layers to make it easy to adapt to your particular situation/track. The simpliest type of generator is the default `Simulator` object:
 ```python
 from simulator import Simulator
 
@@ -43,7 +43,7 @@ simulator.add(Crop())
 ```
 
 White object gives a range of white-ish colors to draw the lines. They may not appear exactly white on the images. 
-There exists three colors for now (Yellow, White and DarkShadow). You can add more colors by replicating the yellow example.
+There exists three colors for now (Yellow, White and DarkShadow) and a generic Color class. You can add more colors by replicating the yellow example.
 
 Now, let's generate the images. We just need to write:
 
