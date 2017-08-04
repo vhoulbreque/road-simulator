@@ -3,13 +3,17 @@
 The road_simulator is part of the 'ironcar' project.
 To see what the ironcar project is, go to the [ironcar repository](https://github.com/vinzeebreak/ironcar).
 
-This simulator generates 'fake' pictures of a road as seen by a 1/10th car with a wide angle camera. We used it to get (250 * 70) RGB dimensional images. It is quite fast (I mean, at least faster than driving the car ourselves), and far more accurate in the learning process (less approximations of curves etc).
+This simulator generates 'fake' pictures of a road as seen by a 1/10th car with a wide angle camera. We used it to get (250 * 70) RGB dimensional images. It is quite fast (we can generate 100,000 images in 15 minutes which is faster than driving the car ourselves and capturing the images), and far more accurate in the learning process (less approximations of curves etc).
 
 These are examples of what can be (very easily) generated:
 
-![dashed line 1](images/example0.jpg)  ![dashed line 2](images/example1.jpg)  ![dashed line 3](images/example2.jpg)  ![dashed line 4](images/example4.jpg)  
 
-![plain line 1](images/example5.jpg)  ![plain line 2](images/example6.jpg)  ![plain line 3](images/example7.jpg)  ![plain line 4](images/example8.jpg)  
+|Some |examples |generated|...
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![dashed line 1](images/example0.jpg)  |  ![dashed line 2](images/example1.jpg)|  ![dashed line 3](images/example2.jpg)|  ![dashed line 4](images/example4.jpg)  
+![plain line 1](images/example5.jpg)  |  ![plain line 2](images/example6.jpg)|  ![plain line 3](images/example7.jpg)|  ![plain line 4](images/example8.jpg) 
+![dashed line 5](images/example3.jpg)  | ![plain_line_5](images/example9.jpg)  | ![plain_line_6](images/example10.jpg)  |
+
 
 With the model created in `example/model_cnn.py` and a dataset of 100,000 images created via simulator, we achieved a 94% accuracy and managed to get our car to successfully finish a lap on 2 different circuits it had never seen before !
 
