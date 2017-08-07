@@ -112,6 +112,9 @@ class DrawLines(Layer):
         self.radius_range = radius_range
         self.thickness_range = thickness_range
         self.color_range = color_range
+        self.input_size = input_size
+        self.width = self.input_size[0]
+        self.height = self.input_size[1]
         if middle_line is not None:
             self.middle_line_plain = middle_line[0]
             self.middle_line_empty = middle_line[1]
@@ -226,9 +229,9 @@ class DrawLines(Layer):
             vect_orthog = Point(-vect.y, vect.x)
 
             vect_orthog = vect_orthog * (1/vect_orthog.norm())
-            middle = (pt1+pt2) * 0.5
+            middle = (pt1 + pt2) * 0.5
 
-            triangle_height = sqrt(radius*radius - (vect.norm() * 0.5 * vect.norm() * 0.5 ) )
+            triangle_height = sqrt(radius*radius - (vect.norm() * 0.5 * vect.norm() * 0.5 ))
             center = middle + vect_orthog * triangle_height
 
             # make sure the center is on the correct side of the points
@@ -280,10 +283,10 @@ class DrawLines(Layer):
 
         img = im.copy()
 
-        pose = Point(250/2, 200)
+        pose = Point(self.width/2, self.height)
 
-        max_width = 200
-        min_width = 100
+        # max_width = 200
+        # min_width = 100
 
         # if midline.x0 >= 125:
         #     width = randint(max(min_width, 2 * midline.x0 - 250), max(max_width, 2 * midline.x0 - 250))
@@ -291,11 +294,12 @@ class DrawLines(Layer):
         #     width = randint(max(min_width, 250 - 2 * midline.x0),  max(max_width, 250 - 2 * midline.x0))
 
         midline = middle_lines_generator(self.xy0_range, self.xy1_range, self.radius_range, self.thickness_range, self.color_range)
-        while 2 * midline.x0 - 250 > 140:
+        while 2 * midline.x0 - self.width > 140:
             midline = middle_lines_generator(self.xy0_range, self.xy1_range, self.radius_range, self.thickness_range, self.color_range)
-        width = randint(max(70, 2 * midline.x0 - 250), 140)
+        width = randint(max(70, 2 * midline.x0 - self.width), 140)
 
-        img = middleline2drawing(img, midline, width=width, right_turn=True, color_range=self.color_range)
+        img = middleline2drawing(img, midline, width=width, right_turn=True,
+                                    color_range=self.color_range)
 
         angle, gas = middle_line2dir_gas(midline, pose)
 
@@ -348,13 +352,15 @@ class Perspective(Layer):
         This layer creates the perspective of an image.
     '''
 
-    def __init__(self, name='Perspective'):
+    def __init__(self, output_dim=(250, 70), name='Perspective'):
 
         if name is None:
             raise ValueError('name must be different from None')
 
         super(Perspective, self).__init__()
 
+        self.new_width = output_dim[0]
+        self.new_height = output_dim[1]
         self.name = name
 
     def call(self, img):
@@ -363,10 +369,14 @@ class Perspective(Layer):
             raise ValueError('img is None')
 
         width, height = img.size
-        from_points = [(0, 0), (249, 0), (249, 199), (0, 199)]
-        new_points = [(253-1, 0), (253+250-1, 0), (253*2+250-1, 70-1), (0, 70-1)]
+        from_points = [(0, 0), (width-1, 0), (width-1, height-1), (0, height-1)]
+        new_points = [(self.new_width-1, 0),
+                        (self.new_width+self.new_width-1, 0),
+                        (self.new_width*2+self.new_width-1, self.new_height-1),
+                        (0, self.new_height-1)]
         coeffs = find_coeffs(new_points, from_points)
-        img = img.transform((250+253*2, 70), Image.PERSPECTIVE, coeffs, Image.BICUBIC)
+        img = img.transform((self.new_width+self.new_width*2, self.new_height),
+                                Image.PERSPECTIVE, coeffs, Image.BICUBIC)
         return img
 
 
@@ -376,13 +386,15 @@ class Crop(Layer):
         This layer crops the image.
     '''
 
-    def __init__(self, name='Crop'):
+    def __init__(self, output_dim=(250, 70), name='Crop'):
 
         if name is None:
             raise ValueError('name must be different from None')
 
         super(Crop, self).__init__()
 
+        self.new_width = output_dim[0]
+        self.new_height = output_dim[1]
         self.name = name
 
     def call(self, img):
@@ -390,8 +402,10 @@ class Crop(Layer):
 
         width = img.width
         height = img.height
-        x_shift = 253
-        img = img.crop((x_shift-1, 0, width-x_shift-1, height))
+
+        x_shift = self.new_width
+
+        img = img.crop((x_shift-1, 0, width-x_shift-1, self.new_height))
 
         return img
 
