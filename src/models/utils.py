@@ -3,7 +3,6 @@ import numpy as np
 
 from tqdm import tqdm
 from scipy.misc import imread
-from random import shuffle
 
 
 def get_images(paths, n_images=1000):

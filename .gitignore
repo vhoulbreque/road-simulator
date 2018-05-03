@@ -11,7 +11,7 @@ notebooks/
 __pycache__
 *.pyc
 
-examples/*/
+examples
 
 
 ground_pics/

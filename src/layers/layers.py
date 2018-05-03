@@ -24,14 +24,13 @@
 
 '''
 
-import PIL
 import os
 import numpy as np
 
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
+from tqdm import tqdm
+from PIL import Image, ImageDraw
 from math import sqrt, atan2, pi
 from random import randint, shuffle, choice, gauss, random
-from tqdm import tqdm
 
 from basic_objects import Point, RoadLine, Circle
 
@@ -507,7 +506,7 @@ class Background(Layer):
                 index = randint(0, len(self.width_range)-1)
                 new_width = self.width_range[index]
                 new_height = int(4 * new_width / 5)
-                b = b.resize((new_width, new_height), PIL.Image.ANTIALIAS)
+                b = b.resize((new_width, new_height), .ANTIALIAS)
                 new_backgrounds.append(b)
 
         backgrounds = new_backgrounds
