@@ -12,7 +12,7 @@ from roadsimulator.simulator import Simulator
 
 if __name__ == '__main__':
 
-    width_begin, height_begin = 250, 200
+    width_begin, height_begin = 250, 200  # TODO: not clear
     width_end, height_end = 250, 70
 
     xy0_range = [[x, height_begin] for x in range(0, width_begin+1)]  # add bottom edge of the picture

@@ -1,28 +1,30 @@
-'''
-    Noise Layers are for now on just layers like the 'normal' layers.
-'''
+'''Noise Layers are for now on just layers like the 'normal' layers.'''
 
 import os
 import sys
 import numpy as np
 
-from tqdm import tqdm
-from math import sqrt, atan2, pi
-from random import randint, shuffle, choice, gauss, random
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
+from random import randint, choice, random
+from PIL import ImageDraw, ImageFilter, ImageEnhance
 
 from .layers import Layer
-from ..basic_objects import Point, RoadLine, Circle
 
 
 class Noise(Layer):
 
-    '''
-        Root Object of Noise.
-        By default, identity layer.
+    '''Root Object of Noise.
+    By default, identity layer.
     '''
 
     def __init__(self, name='Noise'):
+        """
+
+        Arguments:
+            name: A string,
+                the name of the noise layer.
+
+        """
+
         if name is None:
             raise ValueError('')
         self.name = name
@@ -38,11 +40,19 @@ class Noise(Layer):
 
 class Shadows(Noise):
 
-    '''
-        Adds shadows to the image.
-    '''
+    '''Adds shadows to the image.'''
+
+    # TODO: add transparency in the shadows
 
     def __init__(self, color=(255, 255, 255), name='Shadows'):
+        """
+
+        Arguments:
+            color:
+
+            name: A string,
+                the name of the Layer.
+        """
 
         if name is None:
             raise ValueError('')
@@ -80,11 +90,27 @@ class Shadows(Noise):
 
 class Filter(Noise):
 
-    '''
-        Adds filters to the image.
-    '''
+    '''Adds filters to the image.'''
 
     def __init__(self, blur=0, gauss_blur=0, smooth=0, smooth_more=0, rank_filter=0, name='Filter'):
+        """
+
+        Arguments:
+            blur:
+
+            gauss_blur:
+
+            smooth:
+
+            smooth_more:
+
+            rank_filter:
+
+            name: A string,
+                the name of the Layer.
+
+        """
+
         if name is None:
             raise ValueError
         if not all([item is not None for item in [blur, gauss_blur, smooth, smooth_more, rank_filter]]):
@@ -134,9 +160,7 @@ class Filter(Noise):
 
 class NoiseLines(Noise):
 
-    '''
-        Adds noise lines to the image i.e. lines randomly on the picture.
-    '''
+    '''Adds noise lines to the image i.e. lines randomly on the picture.'''
 
     def __init__(self, color_range, n_lines_max=1, proba_line=0.33, name='NoiseLines'):
 

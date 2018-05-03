@@ -25,12 +25,13 @@ scheme:
 import os
 import numpy as np
 
-from tqdm import tqdm
 from PIL import Image, ImageDraw
 from math import sqrt, atan2, pi
 from random import randint, shuffle, choice, gauss, random
 
 from ..basic_objects import Point, RoadLine, Circle
+
+# TODO: this script lacks comments/explanations
 
 
 class Layer():
@@ -51,14 +52,46 @@ class Layer():
 
 
 class DrawLines(Layer):
-    '''This layer draws the border of the road (constituted of 2 lines.)
-    A line in the middle was available in a previous version. It is
-    coming soon.
-    '''
+    '''This layer draws the border of the road (constituted of 2 lines.)'''
 
-    def __init__(self, xy0_range=None, xy1_range=None, radius_range=None,
-                    thickness_range=None, color_range=None, middle_line=None,
-                    name='DrawLines', input_size=(250, 200)):
+    def __init__(self, xy0_range=None,
+                    xy1_range=None,
+                    radius_range=None,
+                    thickness_range=None,
+                    color_range=None,
+                    middle_line=None,
+                    name='DrawLines',
+                    input_size=(250, 200)):
+        """
+        Arguments:
+            xy0_range: A list of length-2 arrays.
+                Every array is a coordinate [x, y].
+                Every coordinate corresponds to the position of the lower
+                intersection of the middle line.
+            xy1_range: A list of length-2 arrays.
+                Every array is a coordinate [x, y].
+                Every coordinate corresponds to the position of the upper
+                intersection of the middle line.
+            radius_range: A list of > 0 integers.
+                The middle line is in fact a circle.
+                The bigger the radius, the straighter the line.
+            thickness_range: A list of > 0 integers.
+                The lines' thickness will be randomly drawn in the list.
+            color_range: list of `Color` objects # TODO
+
+            middle_line: triplet of int.
+                plain = middle_line[0]
+                empty = middle_line[1]
+                line_type = middle_line[2]
+            name: A string,
+                the name of the layer so that it's easy to recognize it.
+            input_size: 2-tuple of int,
+                the size of the input image (width, height)
+
+        Returns:
+            img: an image
+
+        """
 
         super(DrawLines, self).__init__()
 
@@ -78,41 +111,24 @@ class DrawLines(Layer):
             from ..colors import White, Yellow
             color_range = White() + Yellow()
 
-        # if name is None:
-        #     raise ValueError('name must be different from None')
-        # if not all([r is not None and len(r)> 0 and isinstance(r, list) for r in [xy0_range, xy1_range, radius_range, thickness_range]]):
-        #     raise ValueError('xy0_range, xy1_range, radius_range and thickness_range must not be None or empty lists')
-        # if not all([all([isinstance(r, list) for r in l]) for l in [xy0_range, xy1_range]]):
-        #     raise ValueError('xy0_range and xy1_range must be composed of lists')
-        # if not all([all([len(r) == 2 for r in l]) for l in [xy0_range, xy1_range]]):
-        #     raise ValueError('xy0_range and xy1_range must be lists of 2 item long lists')
-        # if not all([all([isinstance(r, int) for r in l]) for l in [radius_range, thickness_range]]):
-        #     raise ValueError('radius_range and thickness_range must be composed of integers')
-        # if color_range is None:
-        #     raise ValueError('color_range must be different from None')
-        # if len(color_range.colors) == 0:
-        #     raise ValueError('color_range must have at least one color')
-        # if middle_line is not None:
-        #     if len(middle_line) != 3:
-        #         raise ValueError('middle_line needs to be a tuple of length 3 when not None')
-        #     if not all([(isinstance(middle_line[i], float) or isinstance(middle_line[i], int)) and middle_line[i] >= 0 for i in range(len(middle_line)-1)]):
-        #         raise ValueError('The 2 first elements of middle_line must be int or float')
-        #     if not middle_line[2] in [None, 'dashed', 'plain']:
-        #         raise ValueError('The third element of middle_line must be None, \'dashed\' or \'plain\'')
-
         self.xy0_range = xy0_range
         self.xy1_range = xy1_range
         self.radius_range = radius_range
         self.thickness_range = thickness_range
         self.color_range = color_range
+
         self.input_size = input_size
         self.width = self.input_size[0]
         self.height = self.input_size[1]
+
+        # Is there a VISIBLE middle line ? (the middle always exist)
+        # TODO: quite complex to have a 3-tuple for middle_line...
         if middle_line is not None:
             self.middle_line_plain = middle_line[0]
             self.middle_line_empty = middle_line[1]
             self.middle_line_type = middle_line[2]
         else:
+            # Make it invisible by default
             self.middle_line_plain = None
             self.middle_line_empty = None
             self.middle_line_type = None
@@ -122,6 +138,17 @@ class DrawLines(Layer):
     def call(self, im):
 
         def middle_line2dir_gas(curr_line, pose):
+            """
+
+            Arguments:
+                curr_line:
+
+                pose:
+
+            Returns:
+
+            """
+
             radius = curr_line.radius
             pt0 = Point(curr_line.x0, curr_line.y0)
             pt1 = Point(curr_line.x1, curr_line.y1)
@@ -136,6 +163,22 @@ class DrawLines(Layer):
             return output
 
         def middle_lines_generator(xy0_range, xy1_range, radius_range, thickness_range, color_range):
+            """
+
+            Arguments:
+                xy0_range:
+
+                xy1_range:
+
+                radius_range:
+
+                thickness_range:
+
+                color_range:
+
+            Returns:
+
+            """
 
             index = int(gauss(len(xy0_range)//2, 50))
             while index >= len(xy0_range) or index < 0:
@@ -154,6 +197,22 @@ class DrawLines(Layer):
             return RoadLine(x0, y0, x1, y1, radius, thickness=thickness, color=color)
 
         def middleline2drawing(img, line, width=55, right_turn=True, color_range=None):
+            """
+
+            Arguments:
+                img:
+
+                line:
+
+                width:
+
+                right_turn:
+
+                color_range:
+
+            Returns:
+
+            """
 
             # Real lines
             line1 = line.copy()
@@ -190,6 +249,18 @@ class DrawLines(Layer):
             return img
 
         def draw_circle(draw, circle):
+            """
+
+            Arguments:
+                draw:
+
+                circle:
+
+            Returns:
+
+
+            """
+
             thickness = circle.thickness
             color = circle.color
 
@@ -218,6 +289,18 @@ class DrawLines(Layer):
                         draw.arc(xy, start*(180/pi), end*(180/pi), fill=color)
 
         def pts2center(pt1, pt2, radius, right_turn=True):
+            """
+
+            Arguments:
+                pt1:
+
+                pt2:
+
+                radius:
+
+                right_turn:
+
+            """
             vect = pt2 - pt1
             vect_orthog = Point(-vect.y, vect.x)
 
@@ -239,12 +322,43 @@ class DrawLines(Layer):
             return center
 
         def draw_lines(img, line1, line2, right_turn=True):
+            """
+
+            Arguments:
+                img:
+
+                line1:
+
+                line2:
+
+                right_turn:
+
+            Returns:
+
+            """
+
             draw = ImageDraw.Draw(img)
             draw_line(draw, line1, right_turn=right_turn)
             draw_line(draw, line2, right_turn=right_turn)
             return img
 
         def draw_line(draw, line, right_turn=True, plain=1, empty=0):
+            """
+
+            Arguments:
+                draw:
+
+                line:
+
+                right_turn:
+
+                plain:
+
+                empty:
+
+            Returns:
+
+            """
 
             if line.y1 > line.y0:
                 x0, y0 = line.x1, line.y1
@@ -278,18 +392,12 @@ class DrawLines(Layer):
 
         pose = Point(self.width/2, self.height)
 
-        # max_width = 200
-        # min_width = 100
-
-        # if midline.x0 >= 125:
-        #     width = randint(max(min_width, 2 * midline.x0 - 250), max(max_width, 2 * midline.x0 - 250))
-        # else:
-        #     width = randint(max(min_width, 250 - 2 * midline.x0),  max(max_width, 250 - 2 * midline.x0))
-
         midline = middle_lines_generator(self.xy0_range, self.xy1_range, self.radius_range, self.thickness_range, self.color_range)
         while 2 * midline.x0 - self.width > 140:
             midline = middle_lines_generator(self.xy0_range, self.xy1_range, self.radius_range, self.thickness_range, self.color_range)
-        width = randint(max(70, 2 * midline.x0 - self.width), 140)
+        # TODO: change this so that the distance between the 2 lines can be chosen
+        # by the user
+        width = randint(max(100, 2 * midline.x0 - self.width), 200)
 
         img = middleline2drawing(img, midline, width=width, right_turn=True,
                                     color_range=self.color_range)
@@ -299,6 +407,8 @@ class DrawLines(Layer):
         return img, angle, gas
 
     def summary(self):
+        """Returns a string describing this layer"""
+
         return '{}'.format(self.name)
 
 
@@ -306,6 +416,14 @@ class Symmetric(Layer):
     '''This layer creates the symmetric of an image.'''
 
     def __init__(self, proba=0.5, name='Symmetric'):
+        """
+
+        Arguments:
+            proba:
+
+            name: a string,
+                the name of the layer
+        """
 
         super(Symmetric, self).__init__()
 
@@ -342,6 +460,14 @@ class Perspective(Layer):
     '''This layer creates the perspective of an image.'''
 
     def __init__(self, output_dim=(250, 70), name='Perspective'):
+        """
+
+        Arguments:
+            output_dim:
+
+            name: a string,
+                the name of the layer
+        """
 
         if name is None:
             raise ValueError('name must be different from None')
@@ -373,6 +499,14 @@ class Crop(Layer):
     '''This layer crops the image.'''
 
     def __init__(self, output_dim=(250, 70), name='Crop'):
+        """
+
+        Arguments:
+            output_dim:
+
+            name: a string,
+                the name of the layer
+        """
 
         if name is None:
             raise ValueError('name must be different from None')
@@ -404,7 +538,33 @@ class Background(Layer):
     def __init__(self, n_backgrounds, path, n_rot=1, n_res=1, n_crop=1,
                     input_size=(250, 200), output_size=(250, 70),
                     width_range=None, angle_max=20, name='Background'):
+        """
 
+        Arguments:
+            n_backgrounds:
+
+            path:
+
+            n_rot:
+
+            n_res:
+
+            n_crop:
+
+            input_size:
+
+            output_size:
+
+            width_range:
+
+            angle_max:
+
+            name: a string,
+                the name of the layer
+        """
+
+        # TODO: how to decrease the amount of ValueError ?
+        # TODO: how to increase readibility ?
         if width_range is None:
             width_range = [i for i in range(output_size[0], output_size[0] + 500)]
         if name is None:
@@ -451,6 +611,15 @@ class Background(Layer):
         self.name = name
 
     def generate_all_backgrounds(self):
+        """
+
+
+        Returns:
+
+        """
+
+        from tqdm import tqdm
+
         width, height = self.input_size
 
         # Choice of the background image
@@ -512,13 +681,24 @@ class Background(Layer):
         return backgrounds
 
     def summary(self):
+        """Returns a string describing the layer"""
+
         return '{}\t{}\t{}\t{}\t{}'.format(self.name, self.n_backgrounds,
                                             self.n_res, self.n_rot, self.n_crop)
 
 
+# TODO: in another file
 def find_coeffs(pa, pb):
     """Function to find the points to apply a transformation between 2 points
     in an image.
+
+    Arguments:
+        pa:
+
+        pb:
+
+    Returns:
+
     """
     matrix = []
     for p1, p2 in zip(pa, pb):
