@@ -19,15 +19,11 @@ With the model created in `example/model_cnn.py` and a dataset of 100,000 images
 
 ## Getting started
 
-The following code is meant to be in the road_simulator directory. Please adapt `./src/` and `./ground_pics` to fit your current layout.
-```python
-import sys
-sys.path.insert(0, './src/')
-```
+In this code, please adapt `./ground_pics` to fit your current layout.
 
 Each simulator is composed of layers to make it easy to adapt to your particular situation/track. The simpliest type of generator is the default `Simulator` object:
 ```python
-from simulator import Simulator
+from roadsimulator.simulator import Simulator
 
 simulator = Simulator()
 ```
@@ -35,8 +31,8 @@ simulator = Simulator()
 Then, we add layers to our generator:
 
 ```python
-from colors import White
-from layers.layers import Background, DrawLines, Perspective, Crop
+from roadsimulator.colors import White
+from roadsimulator.layers.layers import Background, DrawLines, Perspective, Crop
 
 white = White()
 
@@ -63,7 +59,7 @@ You can simply create a keras model.
 
 First, let's load the images and their labels, split in a training and validation sets:
 ```python
-from models.utils import get_datasets
+from roadsimulator.models.utils import get_datasets
 
 train_X, train_Y, val_X, val_Y, _, _ = get_datasets('my_dataset', n_images=1000)
 ```
