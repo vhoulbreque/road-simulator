@@ -11,7 +11,11 @@ notebooks/
 __pycache__
 *.pyc
 
-examples
+# Examples datasets
+examples/*/*.jpg
 
-
-ground_pics/
+# Ground Pictures
+ground_pics/*
+!ground_pics/g0.jpg
+!ground_pics/g1.jpg
+!ground_pics/g2.jpg
