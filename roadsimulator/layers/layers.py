@@ -87,10 +87,6 @@ class DrawLines(Layer):
                 the name of the layer so that it's easy to recognize it.
             input_size: 2-tuple of int,
                 the size of the input image (width, height)
-
-        Returns:
-            img: an image
-
         """
 
         super(DrawLines, self).__init__()
@@ -139,6 +135,8 @@ class DrawLines(Layer):
 
         def middle_line2dir_gas(curr_line, pose):
             """
+            Calculates the (dir, gas) values given the position
+            of the car compared to the middle line.
 
             Arguments:
                 curr_line:
@@ -155,29 +153,34 @@ class DrawLines(Layer):
             center = pts2center(pt0, pt1, radius)
             vect = 0.5 * (pt0 + pt1) - center
             target_pt = center + vect * (radius/vect.norm())
-
             target_vect = target_pt - pose
             angle = atan2(target_vect.x, -target_vect.y) * 6 / pi
+
             gas = 0.5
-            output = angle, gas
-            return output
+
+            return angle, gas
 
         def middle_lines_generator(xy0_range, xy1_range, radius_range, thickness_range, color_range):
             """
 
             Arguments:
-                xy0_range:
-
-                xy1_range:
-
-                radius_range:
-
-                thickness_range:
-
-                color_range:
+                xy0_range: A list of length-2 arrays.
+                    Every array is a coordinate [x, y].
+                    Every coordinate corresponds to the position of the lower
+                    intersection of the middle line.
+                xy1_range: A list of length-2 arrays.
+                    Every array is a coordinate [x, y].
+                    Every coordinate corresponds to the position of the upper
+                    intersection of the middle line.
+                radius_range: A list of > 0 integers.
+                    The middle line is in fact a circle.
+                    The bigger the radius, the straighter the line.
+                thickness_range: A list of > 0 integers.
+                    The lines' thickness will be randomly drawn in the list.
+                color_range: list of `Color` objects # TODO
 
             Returns:
-
+                A `RoadLine` object
             """
 
             index = int(gauss(len(xy0_range)//2, 50))
@@ -202,10 +205,10 @@ class DrawLines(Layer):
             Arguments:
                 img:
 
-                line:
-
-                width:
-
+                line: `Line` object,
+                    the middle line.
+                width: > 0 integer,
+                    the distance between the 2 outer lines
                 right_turn:
 
                 color_range:
@@ -225,8 +228,11 @@ class DrawLines(Layer):
 
             draw = ImageDraw.Draw(img)
 
+            # Draw the outer lines
             draw_line(draw, line1 - int(width/2), right_turn=right_turn)
             draw_line(draw, line2 + int(width/2), right_turn=right_turn)
+
+            # Draw the middle line if visible, depending on the type
             if self.middle_line_type == 'dashed':
                 draw_line(draw, middle_line, right_turn=right_turn,
                             plain=self.middle_line_plain,
@@ -235,6 +241,7 @@ class DrawLines(Layer):
                 draw_line(draw, middle_line, right_turn=right_turn)
 
             # Noise lines
+            # TODO: these lines should be of a different color (like shadows...)
             if randint(0, 1):
                 line1 = line.copy()
                 line2 = line.copy()
@@ -249,15 +256,12 @@ class DrawLines(Layer):
             return img
 
         def draw_circle(draw, circle):
-            """
+            """Draws a circle on a `ImageDraw` object.
 
             Arguments:
                 draw:
 
-                circle:
-
-            Returns:
-
+                circle: A `Circle` object.
 
             """
 
@@ -301,6 +305,7 @@ class DrawLines(Layer):
                 right_turn:
 
             """
+
             vect = pt2 - pt1
             vect_orthog = Point(-vect.y, vect.x)
 
@@ -311,7 +316,7 @@ class DrawLines(Layer):
             center = middle + vect_orthog * triangle_height
 
             # make sure the center is on the correct side of the points
-            #it is on the right by default
+            # it is on the right by default
             symmetry = True
             if center.x > middle.x:
                 symmetry = False
@@ -320,27 +325,6 @@ class DrawLines(Layer):
             if symmetry:
                 center = 2 * middle - center
             return center
-
-        def draw_lines(img, line1, line2, right_turn=True):
-            """
-
-            Arguments:
-                img:
-
-                line1:
-
-                line2:
-
-                right_turn:
-
-            Returns:
-
-            """
-
-            draw = ImageDraw.Draw(img)
-            draw_line(draw, line1, right_turn=right_turn)
-            draw_line(draw, line2, right_turn=right_turn)
-            return img
 
         def draw_line(draw, line, right_turn=True, plain=1, empty=0):
             """
@@ -393,7 +377,7 @@ class DrawLines(Layer):
         pose = Point(self.width/2, self.height)
 
         midline = middle_lines_generator(self.xy0_range, self.xy1_range, self.radius_range, self.thickness_range, self.color_range)
-        while 2 * midline.x0 - self.width > 140:
+        while 2 * midline.x0 - self.width > 200:
             midline = middle_lines_generator(self.xy0_range, self.xy1_range, self.radius_range, self.thickness_range, self.color_range)
         # TODO: change this so that the distance between the 2 lines can be chosen
         # by the user
@@ -453,6 +437,8 @@ class Symmetric(Layer):
         return sym, symmetry
 
     def summary(self):
+        """Returns a string describing this layer"""
+
         return '{}\t{}'.format(self.name, self.proba)
 
 
@@ -611,11 +597,14 @@ class Background(Layer):
         self.name = name
 
     def generate_all_backgrounds(self):
-        """
-
+        """Generates backgrounds via:
+            - choice of background image
+            - rotation
+            - resizing
+            - cropping
 
         Returns:
-
+            List of images of backgrounds.
         """
 
         from tqdm import tqdm
@@ -678,6 +667,7 @@ class Background(Layer):
         backgrounds = new_backgrounds
         shuffle(backgrounds)
         backgrounds = backgrounds[:self.n_backgrounds]
+
         return backgrounds
 
     def summary(self):
