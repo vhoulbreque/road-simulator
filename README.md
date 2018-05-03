@@ -9,17 +9,17 @@ This simulator generates 'fake' pictures of a road as seen by a 1/10th car with 
 These are examples of what can be (very easily) generated:
 
 
-![dashed line 1](images/example0.jpg)  |  ![dashed line 2](images/example1.jpg)|  ![dashed line 3](images/example2.jpg)|  ![dashed line 4](images/example4.jpg)  
+![dashed line 1](docs/example0.jpg)  |  ![dashed line 2](docs/example1.jpg)|  ![dashed line 3](docs/example2.jpg)|  ![dashed line 4](docs/example4.jpg)  
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
-![plain line 1](images/example5.jpg)  |  ![plain line 2](images/example6.jpg)|  ![plain line 3](images/example7.jpg)|  ![plain line 4](images/example8.jpg)
-![dashed line 5](images/example3.jpg)  | ![plain_line_5](images/example9.jpg)  | ![plain_line_6](images/example10.jpg)  |![plain_line_7](images/example11.jpg)  
+![plain line 1](docs/example5.jpg)  |  ![plain line 2](docs/example6.jpg)|  ![plain line 3](docs/example7.jpg)|  ![plain line 4](docs/example8.jpg)
+![dashed line 5](docs/example3.jpg)  | ![plain_line_5](docs/example9.jpg)  | ![plain_line_6](docs/example10.jpg)  |![plain_line_7](docs/example11.jpg)  
 
 
 With the model created in `example/model_cnn.py` and a dataset of 100,000 images created via simulator, we achieved a 94% accuracy and managed to get our car to successfully finish a lap on 2 different circuits it had never seen before !
 
 ## Getting started
 
-The following code is meant to be in the road_simulator directory. Please adapt `./src/` and `./ground_pics`to fit your current layout.
+The following code is meant to be in the road_simulator directory. Please adapt `./src/` and `./ground_pics` to fit your current layout.
 ```python
 import sys
 sys.path.insert(0, './src/')
