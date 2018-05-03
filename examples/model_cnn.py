@@ -5,10 +5,7 @@ from keras.layers import Dropout, Flatten, Dense, BatchNormalization
 from keras.models import Model
 from keras.optimizers import Adam
 
-import sys
-sys.path.insert(0, '../src/')
-
-from models.utils import get_datasets
+from roadsimulator.models.utils import get_datasets
 
 
 paths = ['sample_simple', 'sample_dashed', 'my_dataset']

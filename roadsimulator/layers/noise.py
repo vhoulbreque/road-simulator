@@ -11,10 +11,8 @@ from math import sqrt, atan2, pi
 from random import randint, shuffle, choice, gauss, random
 from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
 
-from basic_objects import Point, RoadLine, Circle
-
-sys.path.insert(0, '../')
-from layers.layers import Layer
+from .layers import Layer
+from ..basic_objects import Point, RoadLine, Circle
 
 
 class Noise(Layer):

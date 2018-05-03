@@ -5,14 +5,10 @@
     Saves these pictures in a folder called examples_pictures.
 '''
 
-import sys
-
-sys.path.insert(0, '../src/')
-
-from colors import Yellow, White, DarkShadow
-from layers.layers import Background, Crop, Perspective, DrawLines, Symmetric
-from layers.noise import Shadows, Filter, NoiseLines, Enhance
-from simulator import Simulator
+from roadsimulator.colors import Yellow, White, DarkShadow
+from roadsimulator.layers.layers import Background, Crop, Perspective, DrawLines, Symmetric
+from roadsimulator.layers.noise import Shadows, Filter, NoiseLines, Enhance
+from roadsimulator.simulator import Simulator
 
 
 if __name__ == '__main__':

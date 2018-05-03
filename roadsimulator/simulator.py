@@ -3,7 +3,7 @@ import os
 from tqdm import tqdm
 from random import randint
 
-from layers.layers import Background, DrawLines, Symmetric
+from .layers.layers import Background, DrawLines, Symmetric
 
 
 class Simulator():
@@ -14,7 +14,7 @@ class Simulator():
 
     def __init__(self, layers=None):
 
-        from layers.layers import Layer
+        from .layers.layers import Layer
 
         if layers is None:
             layers = []

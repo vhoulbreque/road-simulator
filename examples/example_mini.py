@@ -1,12 +1,9 @@
-import sys
-sys.path.insert(0, '../src/')
+from roadsimulator.simulator import Simulator
+from roadsimulator.colors import Yellow, White, DarkShadow
+from roadsimulator.layers.layers import Background, DrawLines, Perspective, Crop
 
-from simulator import Simulator
 
 simulator = Simulator()
-
-from colors import Yellow, White, DarkShadow
-from layers.layers import Background, DrawLines, Perspective, Crop
 
 white = White()
 

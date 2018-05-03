@@ -1,27 +1,25 @@
-'''
-    All general layers objects.
-    A layer has 1 important functions: `call`. This is the function used to
-    manipulate the image that goes out of the former layer.
+'''All general layers objects.
+A layer has 1 important functions: `call`. This is the function used to
+manipulate the image that goes out of the former layer.
 
-    When you want to create a new layer on your own, you have to follow this
-    scheme:
+When you want to create a new layer on your own, you have to follow this
+scheme:
 
-        class MyLayer(Layer):
+    class MyLayer(Layer):
 
-            def __init__(self, **args, **kwargs):
-                # The constructor of the class
-                ...
+        def __init__(self, **args, **kwargs):
+            # The constructor of the class
+            ...
 
-            def call(self, img):
-                # Manipulate the img to do whatever the layer is supposed to do
-                ...
-                return img
+        def call(self, img):
+            # Manipulate the img to do whatever the layer is supposed to do
+            ...
+            return img
 
-            def summary():
-                # Gives information about what is in this layer
-                # Optional
-                ...
-
+        def summary():
+            # Gives information about what is in this layer
+            # Optional
+            ...
 '''
 
 import os
@@ -32,14 +30,12 @@ from PIL import Image, ImageDraw
 from math import sqrt, atan2, pi
 from random import randint, shuffle, choice, gauss, random
 
-from basic_objects import Point, RoadLine, Circle
+from ..basic_objects import Point, RoadLine, Circle
 
 
 class Layer():
-
-    '''
-        Root Object of Layer.
-        By default, identity layer.
+    '''Root Object of Layer.
+    By default, identity layer.
     '''
 
     def __init__(self, name='Layer'):
@@ -55,11 +51,9 @@ class Layer():
 
 
 class DrawLines(Layer):
-
-    '''
-        This layer draws the border of the road (constituted of 2 lines.)
-        A line in the middle was available in a previous version. It is
-        coming soon.
+    '''This layer draws the border of the road (constituted of 2 lines.)
+    A line in the middle was available in a previous version. It is
+    coming soon.
     '''
 
     def __init__(self, xy0_range=None, xy1_range=None, radius_range=None,
@@ -81,7 +75,7 @@ class DrawLines(Layer):
         if thickness_range is None:
             thickness_range = [6, 7, 8, 9, 10]
         if color_range is None:
-            from colors import White, Yellow
+            from ..colors import White, Yellow
             color_range = White() + Yellow()
 
         # if name is None:
@@ -309,9 +303,7 @@ class DrawLines(Layer):
 
 
 class Symmetric(Layer):
-    '''
-        This layer creates the symmetric of an image.
-    '''
+    '''This layer creates the symmetric of an image.'''
 
     def __init__(self, proba=0.5, name='Symmetric'):
 
@@ -347,9 +339,7 @@ class Symmetric(Layer):
 
 
 class Perspective(Layer):
-    '''
-        This layer creates the perspective of an image.
-    '''
+    '''This layer creates the perspective of an image.'''
 
     def __init__(self, output_dim=(250, 70), name='Perspective'):
 
@@ -380,10 +370,7 @@ class Perspective(Layer):
 
 
 class Crop(Layer):
-
-    '''
-        This layer crops the image.
-    '''
+    '''This layer crops the image.'''
 
     def __init__(self, output_dim=(250, 70), name='Crop'):
 
@@ -410,9 +397,8 @@ class Crop(Layer):
 
 
 class Background(Layer):
-    '''
-        This layer is an input layer.
-        It generates the inputs from background images.
+    '''This layer is an input layer.
+    It generates the inputs from background images.
     '''
 
     def __init__(self, n_backgrounds, path, n_rot=1, n_res=1, n_crop=1,
@@ -421,32 +407,26 @@ class Background(Layer):
 
         if width_range is None:
             width_range = [i for i in range(output_size[0], output_size[0] + 500)]
-
         if name is None:
             raise ValueError('name must be different from None')
-
         if not isinstance(n_backgrounds, int):
             raise ValueError('The number of backgrounds to generate must be an integer')
         if n_backgrounds <= 0:
             raise ValueError('The number of backgrounds to generate must be positive')
-
         if not os.path.exists(path):
             raise ValueError('The path `{}` does not exist'.format(path))
         if not os.path.isdir(path):
             raise ValueError('The path `{}` is not a directory'.format(path))
         if len(os.listdir(path)) == 0:
             raise ValueError('There are no images at path `{}`'.format(path))
-
         if not all([isinstance(item, int) and item >= 0 for item in [n_rot, n_res, n_crop]]):
             raise ValueError('The number of rotations, resizing and cropping must all be positive. Not `{}`'.format(str([n_rot, n_res, n_crop])))
-
         if not isinstance(input_size, tuple):
             raise ValueError('input_size must be a tuple : `{}`'.format(str(input_size)))
         if not (len(input_size) == 2):
             raise ValueError('input_size must be 2 dimensional: `{}`'.format(len(input_size)))
         if not (isinstance(input_size[0], int) and isinstance(input_size[1], int) and input_size[0] >= 0 and input_size[1] >= 0):
             raise ValueError('input_size must be 2 dimensional: `{}`'.format(len(input_size)))
-
         if not isinstance(width_range, list) or len(width_range) == 0:
             raise ValueError('width_range must be a non-empty list or None')
         if max(width_range) < input_size[0]:
@@ -506,7 +486,7 @@ class Background(Layer):
                 index = randint(0, len(self.width_range)-1)
                 new_width = self.width_range[index]
                 new_height = int(4 * new_width / 5)
-                b = b.resize((new_width, new_height), .ANTIALIAS)
+                b = b.resize((new_width, new_height), Image.ANTIALIAS)
                 new_backgrounds.append(b)
 
         backgrounds = new_backgrounds
@@ -536,9 +516,10 @@ class Background(Layer):
                                             self.n_res, self.n_rot, self.n_crop)
 
 
-# Function to find the points to apply a transformation between 2 points in an
-# image
 def find_coeffs(pa, pb):
+    """Function to find the points to apply a transformation between 2 points
+    in an image.
+    """
     matrix = []
     for p1, p2 in zip(pa, pb):
         matrix.append([p1[0], p1[1], 1, 0, 0, 0, -p2[0]*p1[0], -p2[0]*p1[1]])
