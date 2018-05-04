@@ -121,11 +121,13 @@ class DrawLines(Layer):
             self.middle_line_plain = middle_line[0]
             self.middle_line_empty = middle_line[1]
             self.middle_line_type = middle_line[2]
+            self.middle_line_color_range = middle_line[3]
         else:
             # Make it invisible by default
             self.middle_line_plain = None
             self.middle_line_empty = None
             self.middle_line_type = None
+            self.middle_line_color_range = color_range
 
         self.max_width = 300
         self.name = name
@@ -241,7 +243,7 @@ class DrawLines(Layer):
 
             line1.color = choice(color_range.colors)
             line2.color = choice(color_range.colors)
-            middle_line.color = choice(color_range.colors)
+            middle_line.color = choice(self.middle_line_color_range.colors)
 
             draw = ImageDraw.Draw(img)
 
@@ -423,7 +425,7 @@ class DrawLines(Layer):
                                         self.xy1_range,
                                         self.radius_range,
                                         self.thickness_range,
-                                        self.color_range)
+                                        self.middle_line_color_range)
 
         # TODO: change this so that the distance between the 2 lines can be chosen
         # by the user
