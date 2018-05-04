@@ -19,6 +19,11 @@ With the model created in `example/model_cnn.py` and a dataset of 100,000 images
 
 ## Getting started
 
+To install the library, do in the root folder:
+```bash
+$ pip install .
+```
+
 In this code, please adapt `./ground_pics` to fit your current layout.
 
 Each simulator is composed of layers to make it easy to adapt to your particular situation/track. The simpliest type of generator is the default `Simulator` object:
