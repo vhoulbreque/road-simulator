@@ -127,6 +127,7 @@ class DrawLines(Layer):
             self.middle_line_empty = None
             self.middle_line_type = None
 
+        self.max_width = 300
         self.name = name
 
     def call(self, im):
@@ -194,7 +195,7 @@ class DrawLines(Layer):
                 index = int(gauss(len(xy0_range)//2, 50))
             x0, y0 = xy0_range[index]
 
-            while 2 * x0 - self.width > 200:
+            while 2 * x0 - self.width > self.max_width:
                 index = int(gauss(len(xy0_range)//2, 50))
                 while index >= len(xy0_range) or index < 0:
                     index = int(gauss(len(xy0_range)//2, 50))
@@ -428,7 +429,7 @@ class DrawLines(Layer):
         # by the user
         # 200: harcoded value
         # 100: harcoded value
-        width = randint(max(100, 2 * midline.x0 - self.width), 200)
+        width = randint(max(180, 2 * midline.x0 - self.width), self.max_width)
 
         # Draw all the visible lines
         img = draw_lines(img, midline, width=width, right_turn=True,
