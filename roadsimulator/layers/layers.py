@@ -31,8 +31,6 @@ from random import randint, shuffle, choice, gauss, random
 
 from ..basic_objects import Point, RoadLine, Circle
 
-# TODO: this script lacks comments/explanations
-
 
 class Layer():
     '''Root Object of Layer.
@@ -77,8 +75,8 @@ class DrawLines(Layer):
                 The bigger the radius, the straighter the line.
             thickness_range: A list of > 0 integers.
                 The lines' thickness will be randomly drawn in the list.
-            color_range: list of `Color` objects # TODO
-
+            color_range: A `Colorange` object,
+                containing all the RGB triplets of color.
             middle_line: triplet of int.
                 plain = middle_line[0]
                 empty = middle_line[1]
@@ -133,18 +131,21 @@ class DrawLines(Layer):
 
     def call(self, im):
 
-        def middle_line2dir_gas(curr_line, pose):
+        def dir_gas(curr_line, pose):
             """
             Calculates the (dir, gas) values given the position
             of the car compared to the middle line.
 
             Arguments:
-                curr_line:
-
-                pose:
+                curr_line: A `RoadLine` object,
+                    the middle line.
+                pose: A `Point` object,
+                    indicates the position of the car on the image.
 
             Returns:
-
+                A couple (angle, gas), the angle of the car given its position
+                compared to the middle line and the gas value.
+                For now, the gas value is constant.
             """
 
             radius = curr_line.radius
@@ -160,8 +161,10 @@ class DrawLines(Layer):
 
             return angle, gas
 
-        def middle_lines_generator(xy0_range, xy1_range, radius_range, thickness_range, color_range):
-            """
+        def generate_middle_line(xy0_range, xy1_range, radius_range, thickness_range, color_range):
+            """Creates the middle line of the road. The middle line position,
+            thickness, radius and color is randomly drawn from the different
+            range arguments.
 
             Arguments:
                 xy0_range: A list of length-2 arrays.
@@ -183,38 +186,51 @@ class DrawLines(Layer):
                 A `RoadLine` object
             """
 
+            # A RoadLine is constituted of 2 points, (x0, y0) and (x1, y1)
+
+            # First, let's choose the (x0, y0) one.
             index = int(gauss(len(xy0_range)//2, 50))
             while index >= len(xy0_range) or index < 0:
                 index = int(gauss(len(xy0_range)//2, 50))
             x0, y0 = xy0_range[index]
 
+            while 2 * x0 - self.width > 200:
+                index = int(gauss(len(xy0_range)//2, 50))
+                while index >= len(xy0_range) or index < 0:
+                    index = int(gauss(len(xy0_range)//2, 50))
+                x0, y0 = xy0_range[index]
+
+            # Secondly, let's choose the (x1, y1) one.
             index = int(gauss(len(xy1_range)//2, 100))
             while index >= len(xy1_range) or index < 0:
                 index = int(gauss(len(xy1_range)//2, 100))
             x1, y1 = xy1_range[index]
 
+            # The bigger the radius, the straighter the line.
             radius = radius_range[randint(0, len(radius_range)-1)]
             thickness = thickness_range[randint(0, len(thickness_range)-1)]
             color = color_range.colors[randint(0, len(color_range.colors)-1)]
 
             return RoadLine(x0, y0, x1, y1, radius, thickness=thickness, color=color)
 
-        def middleline2drawing(img, line, width=55, right_turn=True, color_range=None):
-            """
+        def draw_lines(img, line, width=55, right_turn=True, color_range=None):
+            """Draws the visible lines on the image.
 
             Arguments:
-                img:
-
-                line: `Line` object,
+                img: A `PIL.Image` object,
+                    the image to modify.
+                line: A `RoadLine` object,
                     the middle line.
                 width: > 0 integer,
-                    the distance between the 2 outer lines
-                right_turn:
-
-                color_range:
+                    the distance between the 2 outer lines.
+                right_turn: A Boolean,
+                    does the road goes to the right ?
+                    If `False`, goes to the left by symmetry.
+                color_range: A `ColorRange` object,
+                    the different RGB values the line can take.
 
             Returns:
-
+                The modified image.
             """
 
             # Real lines
@@ -229,16 +245,16 @@ class DrawLines(Layer):
             draw = ImageDraw.Draw(img)
 
             # Draw the outer lines
-            draw_line(draw, line1 - int(width/2), right_turn=right_turn)
-            draw_line(draw, line2 + int(width/2), right_turn=right_turn)
+            draw_one_line(draw, line1 - int(width/2), right_turn=right_turn)
+            draw_one_line(draw, line2 + int(width/2), right_turn=right_turn)
 
             # Draw the middle line if visible, depending on the type
             if self.middle_line_type == 'dashed':
-                draw_line(draw, middle_line, right_turn=right_turn,
+                draw_one_line(draw, middle_line, right_turn=right_turn,
                             plain=self.middle_line_plain,
                             empty=self.middle_line_empty)
             elif self.middle_line_type == 'plain':
-                draw_line(draw, middle_line, right_turn=right_turn)
+                draw_one_line(draw, middle_line, right_turn=right_turn)
 
             # Noise lines
             # TODO: these lines should be of a different color (like shadows...)
@@ -250,8 +266,8 @@ class DrawLines(Layer):
 
                 width_noise = (1.4 + 3 * random()) * width
 
-                draw_line(draw, line1 - int(width_noise/2), right_turn=right_turn)
-                draw_line(draw, line2 + int(width_noise/2), right_turn=right_turn)
+                draw_one_line(draw, line1 - int(width_noise/2), right_turn=right_turn)
+                draw_one_line(draw, line2 + int(width_noise/2), right_turn=right_turn)
 
             return img
 
@@ -259,7 +275,7 @@ class DrawLines(Layer):
             """Draws a circle on a `ImageDraw` object.
 
             Arguments:
-                draw:
+                draw: A `PIL.Draw` object.
 
                 circle: A `Circle` object.
 
@@ -277,7 +293,7 @@ class DrawLines(Layer):
             end = 360
 
             if circle.empty == 0:
-                for i in range(0,thickness):
+                for i in range(0, thickness):
                     diff = i - int(thickness/2)
                     xy = [x0+diff, y0, x1+diff, y1]
                     draw.arc(xy, start, end, fill=color)
@@ -293,17 +309,22 @@ class DrawLines(Layer):
                         draw.arc(xy, start*(180/pi), end*(180/pi), fill=color)
 
         def pts2center(pt1, pt2, radius, right_turn=True):
-            """
+            """To draw a circle given 2 points and a radius, we need the center
+            of the circle. We calculate it here.
 
             Arguments:
-                pt1:
+                pt1: A `Point` object,
+                    the first point belonging to the circle.
+                pt2: A `Point` object,
+                    the second point belonging to the circle.
+                radius: An integer,
+                    the radius of the circle.
+                right_turn: A Boolean,
+                    does the road goes to the right ?
+                    If `False`, goes to the left by symmetry.
 
-                pt2:
-
-                radius:
-
-                right_turn:
-
+            Returns:
+                A `Point` object modelizing the center of the circle.
             """
 
             vect = pt2 - pt1
@@ -315,33 +336,49 @@ class DrawLines(Layer):
             triangle_height = sqrt(radius*radius - (vect.norm() * 0.5 * vect.norm() * 0.5 ))
             center = middle + vect_orthog * triangle_height
 
-            # make sure the center is on the correct side of the points
-            # it is on the right by default
+            # Make sure the center is on the correct side of the points
             symmetry = True
             if center.x > middle.x:
                 symmetry = False
-            if not right_turn: symmetry = not symmetry
-            # if not, take the symmetric point with respect to the middle
+            if not right_turn:
+                symmetry = not symmetry
+
+            # If not, take the symmetric point with respect to the middle
             if symmetry:
                 center = 2 * middle - center
+
             return center
 
-        def draw_line(draw, line, right_turn=True, plain=1, empty=0):
-            """
+        def draw_one_line(draw, line, right_turn=True, plain=1, empty=0):
+            """Draws a line on the image.
+            The method used to draw a line depends o the radius of the line,
+            and if the line is dashed or not.
 
             Arguments:
-                draw:
-
-                line:
-
-                right_turn:
-
-                plain:
-
-                empty:
+                draw: A `PIL.ImageDraw` object,
+                    represents the image on which the lines
+                    are drawn.
+                line: A `RoadLine` object,
+                    the line to draw.
+                right_turn: A Boolean,
+                    does the road goes to the right ?
+                    If `False`, goes to the left by symmetry.
+                plain: An integer,
+                    tells the proportion of 'plain' line.
+                    If empty is 0, the line is 'plain'.
+                empty: An integer,
+                    tells the proportion of 'empty' line.
+                    If 0, the line is 'plain'. If not, the line is dashed.
 
             Returns:
-
+                img: A `PIL.Image` object,
+                    the modified image.
+                angle: A float,
+                    the angle to get to the right position considering
+                    the current picture, the position of the car, and the
+                    position of the middle line.
+                gas: A float,
+                    the gas value.
             """
 
             if line.y1 > line.y0:
@@ -352,6 +389,7 @@ class DrawLines(Layer):
                 x1, y1 = line.x1, line.y1
 
             if x0 == x1:
+                # Straight line
                 draw.line([x0, y0, x1, y1], fill=line.color, width=line.thickness)
             else:
                 radius = line.radius
@@ -361,8 +399,9 @@ class DrawLines(Layer):
                 thickness = line.thickness
                 color = line.color
 
-                circle1 = Circle(center, radius,thickness=thickness, color=color)
+                circle1 = Circle(center, radius, thickness=thickness, color=color)
 
+                # That is, the line is dashed
                 if empty != 0:
                     circle1.plain = plain
                     circle1.empty = empty
@@ -374,19 +413,30 @@ class DrawLines(Layer):
 
         img = im.copy()
 
+        # Current position of the car (the car is generally in the middle of
+        # the lower bound of the image)
         pose = Point(self.width/2, self.height)
 
-        midline = middle_lines_generator(self.xy0_range, self.xy1_range, self.radius_range, self.thickness_range, self.color_range)
-        while 2 * midline.x0 - self.width > 200:
-            midline = middle_lines_generator(self.xy0_range, self.xy1_range, self.radius_range, self.thickness_range, self.color_range)
+        # Middle line
+        midline = generate_middle_line(self.xy0_range,
+                                        self.xy1_range,
+                                        self.radius_range,
+                                        self.thickness_range,
+                                        self.color_range)
+
         # TODO: change this so that the distance between the 2 lines can be chosen
         # by the user
+        # 200: harcoded value
+        # 100: harcoded value
         width = randint(max(100, 2 * midline.x0 - self.width), 200)
 
-        img = middleline2drawing(img, midline, width=width, right_turn=True,
+        # Draw all the visible lines
+        img = draw_lines(img, midline, width=width, right_turn=True,
                                     color_range=self.color_range)
 
-        angle, gas = middle_line2dir_gas(midline, pose)
+        # Get the angle and gas depending on the position of
+        # the car with respect to the middle line.
+        angle, gas = dir_gas(midline, pose)
 
         return img, angle, gas
 
@@ -401,11 +451,13 @@ class Symmetric(Layer):
 
     def __init__(self, proba=0.5, name='Symmetric'):
         """
-
         Arguments:
-            proba:
+            proba: A float,
+                the probability to use the symmetric instead of the original
+                image. On the original image, the lines are always going to
+                the right.
 
-            name: a string,
+            name: A string,
                 the name of the layer
         """
 
@@ -432,6 +484,7 @@ class Symmetric(Layer):
             from_points = [(0, 0), (width-1, 0), (width-1, height-1), (0, height-1)]
             new_points = [(width-1, 0), (0, 0), (0, height-1), (width-1, height-1)]
             coeffs = find_coeffs(new_points, from_points)
+            # Symmetry according to PIL..
             sym = sym.transform((width, height), Image.PERSPECTIVE, coeffs, Image.BICUBIC)
             symmetry = True
         return sym, symmetry
@@ -447,11 +500,11 @@ class Perspective(Layer):
 
     def __init__(self, output_dim=(250, 70), name='Perspective'):
         """
-
         Arguments:
-            output_dim:
+            output_dim: A tuple of 2-integers, (width, height),
+                the output dimensions of the image after perspective.
 
-            name: a string,
+            name: A string,
                 the name of the layer
         """
 
@@ -486,11 +539,11 @@ class Crop(Layer):
 
     def __init__(self, output_dim=(250, 70), name='Crop'):
         """
-
         Arguments:
-            output_dim:
+            output_dim: A tuple of 2-integers, (width, height),
+                the output dimensions of the image after crop.
 
-            name: a string,
+            name: A string,
                 the name of the layer
         """
 
@@ -527,19 +580,23 @@ class Background(Layer):
         """
 
         Arguments:
-            n_backgrounds:
-
-            path:
-
-            n_rot:
-
-            n_res:
-
-            n_crop:
-
+            n_backgrounds: An integer,
+                the number of backgrounds.
+            path: A string,
+                the path to the folder where background images
+                are stocked.
+            n_rot: A > 0 integer,
+                the number of backgrounds to generate
+                by rotating the existing background.
+            n_res: A > 0 integer,
+                the number of backgrounds to generate
+                by resizing the existing background.
+            n_crop: A > 0 integer,
+                the number of backgrounds to generate
+                by cropping the existing background.
             input_size:
 
-            output_size:
+            output_dim:
 
             width_range:
 

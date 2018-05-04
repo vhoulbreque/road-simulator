@@ -1,18 +1,15 @@
-'''
-    These basic objects include lines and objects needed to build these lines
-    (such as circles)
-
+'''These basic objects include lines and objects needed to build these lines
+(such as circles)
 '''
 
 from math import sqrt
 
 
 class RoadLine:
-    '''
-        This is a RoadLine. In fact, a RoadLine is not a real line (except when
-        the road is straight). A RoadLine represents the line of the center of
-        the road. Like this, it is easier to create the 2 real lines that
-        constitute the borders of the road.
+    '''This is a RoadLine. In fact, a RoadLine is not a real line (except when
+    the road is straight). A RoadLine represents the line of the center of
+    the road. Like this, it is easier to create the 2 real lines that
+    constitute the borders of the road.
     '''
 
     def __init__(self, x0, y0, x1, y1, radius, thickness=10, color=(255, 255, 255)):
@@ -52,7 +49,7 @@ class Circle:
             raise ValueError('thickness must be stricly positive (not {})'.format(thickness))
         if color is None:
             raise ValueError('color must be different from None')
-            
+
         self.center = center
         self.radius = radius
         self.thickness = thickness

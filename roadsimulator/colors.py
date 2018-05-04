@@ -70,11 +70,9 @@ class ColorRange(Color):
 
 
 class Yellow(ColorRange):
+    '''Color Yellow. This color is created from sample taken on pictures of the
+    ground in the hangar.
     '''
-        Color Yellow. This color is created from sample taken on pictures of the
-        ground in the hangar.
-    '''
-
 
     def __init__(self, name='yellow'):
 
@@ -87,8 +85,6 @@ class Yellow(ColorRange):
 
         color = ColorRange(samples=local_samples, red_range=5, green_range=5,
                             blue_range=5)
-        # super(ColorRange, self).__init__(samples=local_samples, red_range=5,
-        #                                      green_range=5, blue_range=5)
 
         self.name = name
         self.samples = color.samples
