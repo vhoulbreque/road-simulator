@@ -1,16 +1,14 @@
 import os
 
 from tqdm import tqdm
+from shutil import rmtree
 from random import randint
 
 from .layers.layers import Background, DrawLines, Symmetric
 
 
 class Simulator():
-
-    '''
-        The simulator is most importantly a list of layers.
-    '''
+    """The simulator is most importantly a list of layers."""
 
     def __init__(self, layers=None):
 
@@ -44,8 +42,9 @@ class Simulator():
 
         if os.path.exists(path):
             print('The path `{}` already exists !'.format(path))
-        else:
-            os.makedirs(path)
+            print('Deleting it...')
+            rmtree(path)
+        os.makedirs(path)
 
         for i in tqdm(range(n_examples)):
             index = randint(0, len(self.input_images)-1)

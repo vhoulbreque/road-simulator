@@ -23,12 +23,12 @@ scheme:
 '''
 
 import os
-import numpy as np
 
 from PIL import Image, ImageDraw
 from math import sqrt, atan2, pi
 from random import randint, shuffle, choice, gauss, random
 
+from .utils import find_coeffs
 from ..basic_objects import Point, RoadLine, Circle
 
 
@@ -115,7 +115,7 @@ class DrawLines(Layer):
         self.width = self.input_size[0]
         self.height = self.input_size[1]
 
-        # Is there a VISIBLE middle line ? (the middle always exist)
+        # Is there a VISIBLE middle line ? (the middle line always exists)
         # TODO: quite complex to have a 3-tuple for middle_line...
         if middle_line is not None:
             self.middle_line_plain = middle_line[0]
@@ -596,7 +596,7 @@ class Background(Layer):
                 by cropping the existing background.
             input_size:
 
-            output_dim:
+            output_size:
 
             width_range:
 
@@ -732,28 +732,3 @@ class Background(Layer):
 
         return '{}\t{}\t{}\t{}\t{}'.format(self.name, self.n_backgrounds,
                                             self.n_res, self.n_rot, self.n_crop)
-
-
-# TODO: in another file
-def find_coeffs(pa, pb):
-    """Function to find the points to apply a transformation between 2 points
-    in an image.
-
-    Arguments:
-        pa:
-
-        pb:
-
-    Returns:
-
-    """
-    matrix = []
-    for p1, p2 in zip(pa, pb):
-        matrix.append([p1[0], p1[1], 1, 0, 0, 0, -p2[0]*p1[0], -p2[0]*p1[1]])
-        matrix.append([0, 0, 0, p1[0], p1[1], 1, -p2[1]*p1[0], -p2[1]*p1[1]])
-
-    A = np.matrix(matrix, dtype=np.float)
-    B = np.array(pb).reshape(8)
-
-    res = np.dot(np.linalg.inv(A.T * A) * A.T, B)
-    return np.array(res).reshape(8)
