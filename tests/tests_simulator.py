@@ -1,4 +1,3 @@
-import sys
 import os
 import shutil
 
@@ -7,10 +6,9 @@ from nose.tools import assert_not_equal
 from nose.tools import assert_raises
 from nose.tools import raises
 
-sys.path.insert(0, '../src/')
-from simulator import *
-from layers.layers import *
-from colors import *
+from roadsimulator.simulator import *
+from roadsimulator.layers.layers import *
+from roadsimulator.colors import *
 
 
 class TestSimulator():
